@@ -106,6 +106,7 @@ LANG = {
         "override_ref":     "Ref. PO",
         "override_date":    "Fecha Pedido (YYYY-MM-DD)",
         "override_commit":  "Fecha Compromiso (YYYY-MM-DD)",
+        "new_po_btn":       "🔄 Nuevo PO",
     },
     "en": {
         "page_title":       "LODI — PO Converter",
@@ -149,6 +150,7 @@ LANG = {
         "override_ref":     "PO Reference",
         "override_date":    "Order Date (YYYY-MM-DD)",
         "override_commit":  "Commitment Date (YYYY-MM-DD)",
+        "new_po_btn":       "🔄 New PO",
     },
 }
 
@@ -1184,8 +1186,13 @@ with st.sidebar:
         "LODI Manufacturing<br>Monterrey, MX</div>", unsafe_allow_html=True,
     )
 
-# ── HEADER ROW: logo+title left, lang toggle right ────────────────────────
-_hcol, _lcol = st.columns([7, 1])
+# ── HEADER ROW: logo+title left, new PO + lang toggle right ───────────────
+_hcol, _ncol, _lcol = st.columns([6, 1, 1])
+with _ncol:
+    if st.button(T["new_po_btn"], key="new_po_btn", use_container_width=True):
+        for _k in ["result_df", "raw_response", "ov_cliente", "ov_ref", "ov_date", "ov_commit"]:
+            st.session_state.pop(_k, None)
+        st.rerun()
 with _lcol:
     if st.button(T["toggle_btn"], key="lang_main", use_container_width=True):
         st.session_state.lang = "en" if st.session_state.lang == "es" else "es"
