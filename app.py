@@ -1071,28 +1071,35 @@ div.stDownloadButton > button:hover { opacity: 0.88 !important; transform: none 
     font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-/* ══ TEXT INPUTS (dark theme) ════════════════════════════════════════ */
-[data-testid="stTextInput"] label {
+/* ══ TEXT INPUTS (dark theme — main page only, not login) ════════════ */
+section[data-testid="stMain"] [data-testid="stTextInput"] label {
     color: #94a3b8 !important;
     font-size: 0.8rem !important;
     font-weight: 600 !important;
     font-family: 'Inter', sans-serif !important;
 }
-[data-testid="stTextInput"] > div > div > input {
+section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input {
     background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
     border-radius: 10px !important;
     color: #f1f5f9 !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.9rem !important;
 }
-[data-testid="stTextInput"] > div > div > input::placeholder {
-    color: #475569 !important;
+section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input::placeholder {
+    color: #64748b !important;
 }
-[data-testid="stTextInput"] > div > div > input:focus {
+section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input:focus {
     border-color: #E8622A !important;
     box-shadow: 0 0 0 2px rgba(232,98,42,0.2) !important;
     background: rgba(255,255,255,0.09) !important;
+}
+/* Sidebar API key input — also dark */
+section[data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 10px !important;
+    color: #f1f5f9 !important;
 }
 
 /* ══ PROGRESS BAR ════════════════════════════════════════════════════ */
