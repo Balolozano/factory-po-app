@@ -169,6 +169,7 @@ RULES:
 - qty must be a raw number. Strip units like "pzas", "kg", "pcs", etc.
 - If a field is truly not found, use "" for strings and 0 for qty.
 - Return ONLY the JSON array, no markdown, no explanation, no extra keys.
+- Use COMPACT JSON — no spaces, no indentation, no newlines between fields. Every object on one line.
 
 CRITICAL — cliente field:
 A purchase order is sent BY the buyer TO the vendor (LODI). The document layout is typically:
@@ -701,7 +702,7 @@ def call_claude(text_content: str, vision_images: list[tuple[str, str]]) -> str:
 
     response = client.messages.create(
         model=DEFAULT_MODEL,
-        max_tokens=4096,
+        max_tokens=8192,
         system=[
             {
                 "type": "text",
@@ -718,6 +719,33 @@ def call_claude(text_content: str, vision_images: list[tuple[str, str]]) -> str:
 # ---------------------------------------------------------------------------
 # Helper: Parse Claude response into DataFrame
 # ---------------------------------------------------------------------------
+def _repair_truncated_json(raw: str) -> str:
+    """
+    If Claude's response was cut off mid-JSON (token limit hit), salvage all
+    complete objects by trimming to the last '}' and closing the array.
+    """
+    raw = raw.strip()
+    try:
+        json.loads(raw)
+        return raw  # already valid
+    except json.JSONDecodeError:
+        pass
+
+    # Find the last complete JSON object and close the array there
+    last_brace = raw.rfind('}')
+    if last_brace != -1:
+        candidate = raw[:last_brace + 1] + ']'
+        # Clean up trailing comma before the closing bracket
+        candidate = re.sub(r',\s*\]$', ']', candidate)
+        try:
+            json.loads(candidate)
+            return candidate
+        except json.JSONDecodeError:
+            pass
+
+    return raw  # couldn't repair
+
+
 def parse_response_to_df(raw: str) -> pd.DataFrame:
     """Parse Claude JSON response into an Odoo-shaped DataFrame."""
     # Strip markdown fences if present
@@ -725,8 +753,12 @@ def parse_response_to_df(raw: str) -> pd.DataFrame:
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
 
+    # Attempt to repair truncated JSON (happens with very large POs)
+    repaired = _repair_truncated_json(cleaned)
+    was_truncated = repaired != cleaned and repaired != raw.strip()
+
     try:
-        items = json.loads(cleaned)
+        items = json.loads(repaired)
     except json.JSONDecodeError:
         st.error("Claude devolvió JSON inválido. Respuesta cruda mostrada abajo.")
         st.code(raw)
@@ -734,6 +766,13 @@ def parse_response_to_df(raw: str) -> pd.DataFrame:
 
     if not isinstance(items, list):
         items = [items]
+
+    if was_truncated:
+        st.warning(
+            f"⚠️ Este pedido es muy grande — se recuperaron {len(items)} líneas. "
+            "Es posible que algunas líneas al final estén incompletas. "
+            "Por favor revisa el resultado."
+        )
 
     rows = []
     for item in items:
