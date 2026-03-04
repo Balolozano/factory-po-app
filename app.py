@@ -1192,6 +1192,7 @@ with _ncol:
     if st.button(T["new_po_btn"], key="new_po_btn", use_container_width=True):
         for _k in ["result_df", "raw_response", "ov_cliente", "ov_ref", "ov_date", "ov_commit"]:
             st.session_state.pop(_k, None)
+        st.session_state["ov_reset"] = st.session_state.get("ov_reset", 0) + 1
         st.rerun()
 with _lcol:
     if st.button(T["toggle_btn"], key="lang_main", use_container_width=True):
@@ -1241,13 +1242,14 @@ with st.expander(T["override_title"]):
         f"the AI will detect them automatically.</div>",
         unsafe_allow_html=True,
     )
+    _r = st.session_state.get("ov_reset", 0)
     ov_col1, ov_col2 = st.columns(2)
     with ov_col1:
-        override_cliente = st.text_input(T["override_cliente"], key="ov_cliente", placeholder="Ej: RUSAL SA DE CV")
-        override_date    = st.text_input(T["override_date"],    key="ov_date",    placeholder="2026-03-04")
+        override_cliente = st.text_input(T["override_cliente"], key=f"ov_cliente_{_r}", placeholder="Ej: RUSAL SA DE CV")
+        override_date    = st.text_input(T["override_date"],    key=f"ov_date_{_r}",    placeholder="2026-03-04")
     with ov_col2:
-        override_ref     = st.text_input(T["override_ref"],     key="ov_ref",     placeholder="Ej: PO-12345")
-        override_commit  = st.text_input(T["override_commit"],  key="ov_commit",  placeholder="2026-03-15")
+        override_ref     = st.text_input(T["override_ref"],     key=f"ov_ref_{_r}",     placeholder="Ej: PO-12345")
+        override_commit  = st.text_input(T["override_commit"],  key=f"ov_commit_{_r}",  placeholder="2026-03-15")
 
 if uploaded_files and st.button(T["process_btn"], use_container_width=True):
     text_parts: list[str] = []
@@ -1295,10 +1297,11 @@ if uploaded_files and st.button(T["process_btn"], use_container_width=True):
     result_df = parse_response_to_df(raw_response)
 
     # ── Apply manual overrides (blank AI fields OR user-supplied values) ────
-    ov_cliente = st.session_state.get("ov_cliente", "").strip()
-    ov_ref     = st.session_state.get("ov_ref",     "").strip()
-    ov_date    = st.session_state.get("ov_date",    "").strip()
-    ov_commit  = st.session_state.get("ov_commit",  "").strip()
+    _r = st.session_state.get("ov_reset", 0)
+    ov_cliente = st.session_state.get(f"ov_cliente_{_r}", "").strip()
+    ov_ref     = st.session_state.get(f"ov_ref_{_r}",     "").strip()
+    ov_date    = st.session_state.get(f"ov_date_{_r}",    "").strip()
+    ov_commit  = st.session_state.get(f"ov_commit_{_r}",  "").strip()
     if not result_df.empty:
         if ov_cliente:
             result_df["*//Cliente"] = ov_cliente
