@@ -106,7 +106,7 @@ LANG = {
         "override_ref":     "Ref. PO",
         "override_date":    "Fecha Pedido (YYYY-MM-DD)",
         "override_commit":  "Fecha Compromiso (YYYY-MM-DD)",
-        "new_po_btn":       "🔄 Nuevo PO",
+        "new_po_btn":       "🔄 Nueva PO",
     },
     "en": {
         "page_title":       "LODI — PO Converter",
@@ -1228,12 +1228,14 @@ with _hcol:
     )
 
 # ── UPLOAD ────────────────────────────────────────────────────────────────
+_r = st.session_state.get("ov_reset", 0)
 st.markdown(f"<div class='upload-label'>{T['upload_label']}</div>", unsafe_allow_html=True)
 uploaded_files = st.file_uploader(
     "drop",
     type=["xlsx", "xls", "pdf", "png", "jpg", "jpeg"],
     accept_multiple_files=True,
     label_visibility="collapsed",
+    key=f"file_uploader_{_r}",
 )
 
 if uploaded_files:
@@ -1264,7 +1266,6 @@ st.markdown(
     f"</div></div>",
     unsafe_allow_html=True,
 )
-_r = st.session_state.get("ov_reset", 0)
 ov_col1, ov_col2 = st.columns(2)
 with ov_col1:
     override_cliente = st.text_input(T["override_cliente"], key=f"ov_cliente_{_r}", placeholder="Ej: RUSAL SA DE CV")
