@@ -1087,6 +1087,30 @@ div.stDownloadButton > button:hover { opacity: 0.88 !important; transform: none 
     font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
+/* ══ TEXT INPUTS (dark theme) ════════════════════════════════════════ */
+[data-testid="stTextInput"] label {
+    color: #94a3b8 !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stTextInput"] > div > div > input {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 10px !important;
+    color: #f1f5f9 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.9rem !important;
+}
+[data-testid="stTextInput"] > div > div > input::placeholder {
+    color: #475569 !important;
+}
+[data-testid="stTextInput"] > div > div > input:focus {
+    border-color: #E8622A !important;
+    box-shadow: 0 0 0 2px rgba(232,98,42,0.2) !important;
+    background: rgba(255,255,255,0.09) !important;
+}
+
 /* ══ PROGRESS BAR ════════════════════════════════════════════════════ */
 .stProgress > div > div > div > div { background-color: #E8622A !important; }
 
@@ -1225,31 +1249,33 @@ if uploaded_files:
     )
 
 # ── Optional override fields (always visible) ─────────────────────────────
-with st.expander(T["override_title"]):
-    st.markdown(
-        f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
-        f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
-        f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
-        f"⚠️ <strong>Solo llena estos campos si el PO no los incluye.</strong> "
-        f"Si el PO ya tiene cliente, referencia o fechas, déjalos en blanco — "
-        f"la IA los detectará automáticamente.</div>"
+st.markdown(
+    f"<div style='background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);"
+    f"border-radius:12px;padding:1rem 1.2rem 0.8rem;margin:0.8rem 0'>"
+    f"<div style='font-size:0.8rem;font-weight:700;color:#94a3b8;text-transform:uppercase;"
+    f"letter-spacing:0.8px;margin-bottom:0.6rem;font-family:Inter,sans-serif'>"
+    f"📝 {T['override_title'].replace('📝 ', '')}</div>"
+    f"<div style='background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.35);"
+    f"border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.8rem;"
+    f"font-size:0.8rem;color:#fde68a;font-family:Inter,sans-serif'>"
+    + (
+        "⚠️ <strong>Solo llena estos campos si el PO no los incluye.</strong> "
+        "Si el PO ya los tiene, déjalos en blanco — la IA los detectará automáticamente."
         if st.session_state.lang == "es" else
-        f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
-        f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
-        f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
-        f"⚠️ <strong>Only fill these fields if the PO does not include them.</strong> "
-        f"If the PO already has a client, reference, or dates, leave these blank — "
-        f"the AI will detect them automatically.</div>",
-        unsafe_allow_html=True,
-    )
-    _r = st.session_state.get("ov_reset", 0)
-    ov_col1, ov_col2 = st.columns(2)
-    with ov_col1:
-        override_cliente = st.text_input(T["override_cliente"], key=f"ov_cliente_{_r}", placeholder="Ej: RUSAL SA DE CV")
-        override_date    = st.text_input(T["override_date"],    key=f"ov_date_{_r}",    placeholder="2026-03-04")
-    with ov_col2:
-        override_ref     = st.text_input(T["override_ref"],     key=f"ov_ref_{_r}",     placeholder="Ej: PO-12345")
-        override_commit  = st.text_input(T["override_commit"],  key=f"ov_commit_{_r}",  placeholder="2026-03-15")
+        "⚠️ <strong>Only fill these if the PO does not include them.</strong> "
+        "If the PO already has them, leave blank — the AI will detect them automatically."
+    ) +
+    f"</div></div>",
+    unsafe_allow_html=True,
+)
+_r = st.session_state.get("ov_reset", 0)
+ov_col1, ov_col2 = st.columns(2)
+with ov_col1:
+    override_cliente = st.text_input(T["override_cliente"], key=f"ov_cliente_{_r}", placeholder="Ej: RUSAL SA DE CV")
+    override_date    = st.text_input(T["override_date"],    key=f"ov_date_{_r}",    placeholder="2026-03-04")
+with ov_col2:
+    override_ref     = st.text_input(T["override_ref"],     key=f"ov_ref_{_r}",     placeholder="Ej: PO-12345")
+    override_commit  = st.text_input(T["override_commit"],  key=f"ov_commit_{_r}",  placeholder="2026-03-15")
 
 if uploaded_files and st.button(T["process_btn"], use_container_width=True):
     text_parts: list[str] = []
