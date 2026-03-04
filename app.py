@@ -1079,27 +1079,32 @@ section[data-testid="stMain"] [data-testid="stTextInput"] label {
     font-family: 'Inter', sans-serif !important;
 }
 section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.15) !important;
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
     border-radius: 10px !important;
     color: #f1f5f9 !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.9rem !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
 }
 section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input::placeholder {
     color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1 !important;
 }
 section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input:focus {
     border-color: #E8622A !important;
     box-shadow: 0 0 0 2px rgba(232,98,42,0.2) !important;
-    background: rgba(255,255,255,0.09) !important;
+    background-color: #243247 !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
 }
 /* Sidebar API key input — also dark */
 section[data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
     border-radius: 10px !important;
     color: #f1f5f9 !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
 }
 
 /* ══ PROGRESS BAR ════════════════════════════════════════════════════ */
