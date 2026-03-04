@@ -167,7 +167,7 @@ Each object in the array MUST have exactly these keys (no extras):
 {
   "client_order_ref": "PO or order reference number (string)",
   "date_order": "order date in YYYY-MM-DD format",
-  "commitment_date": "promised/required delivery date in YYYY-MM-DD, or same as date_order if not found",
+  "commitment_date": "promised/required delivery date in YYYY-MM-DD, or 2 days after date_order if not found",
   "cliente": "the company that ISSUED this PO — the BUYER (string)",
   "producto": "the PART NUMBER or PRODUCT CODE (NOT the description) — see CRITICAL section below",
   "qty": quantity as a number (integer or decimal, no text)
@@ -806,6 +806,20 @@ def parse_response_to_df(raw: str) -> pd.DataFrame:
     for col in ALL_ODOO_COLUMNS:
         if col not in df.columns:
             df[col] = ""
+
+    # ── Enforce commitment_date = date_order + 2 days when missing/same ──────
+    from datetime import timedelta
+    for idx, row in df.iterrows():
+        d_order = str(row.get("date_order", "")).strip()
+        d_commit = str(row.get("commitment_date", "")).strip()
+        if d_order and (not d_commit or d_commit == d_order):
+            try:
+                df.at[idx, "commitment_date"] = (
+                    datetime.strptime(d_order, "%Y-%m-%d") + timedelta(days=2)
+                ).strftime("%Y-%m-%d")
+            except ValueError:
+                pass  # date not parseable — leave as-is
+
     return df
 
 
