@@ -100,6 +100,12 @@ LANG = {
         "api_label":        "🔑 API Key",
         "api_active":       "✅ API Key activa",
         "lines_suffix":     "línea(s)",
+        "override_title":   "📝 Datos faltantes (opcional)",
+        "override_sub":     "Si el PO no tiene estos datos, ingrésalos aquí y se aplicarán a todas las líneas.",
+        "override_cliente": "Cliente",
+        "override_ref":     "Ref. PO",
+        "override_date":    "Fecha Pedido (YYYY-MM-DD)",
+        "override_commit":  "Fecha Compromiso (YYYY-MM-DD)",
     },
     "en": {
         "page_title":       "LODI — PO Converter",
@@ -137,6 +143,12 @@ LANG = {
         "api_label":        "🔑 API Key",
         "api_active":       "✅ API Key active",
         "lines_suffix":     "line(s)",
+        "override_title":   "📝 Missing data (optional)",
+        "override_sub":     "If the PO is missing any of these fields, enter them here and they will be applied to all lines.",
+        "override_cliente": "Client",
+        "override_ref":     "PO Reference",
+        "override_date":    "Order Date (YYYY-MM-DD)",
+        "override_commit":  "Commitment Date (YYYY-MM-DD)",
     },
 }
 
@@ -1185,6 +1197,32 @@ if uploaded_files:
         unsafe_allow_html=True,
     )
 
+    # ── Optional override fields ───────────────────────────────────────────
+    with st.expander(T["override_title"]):
+        st.markdown(
+            f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
+            f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
+            f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
+            f"⚠️ <strong>Solo llena estos campos si el PO no los incluye.</strong> "
+            f"Si el PO ya tiene cliente, referencia o fechas, déjalos en blanco — "
+            f"la IA los detectará automáticamente.</div>"
+            if st.session_state.lang == "es" else
+            f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
+            f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
+            f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
+            f"⚠️ <strong>Only fill these fields if the PO does not include them.</strong> "
+            f"If the PO already has a client, reference, or dates, leave these blank — "
+            f"the AI will detect them automatically.</div>",
+            unsafe_allow_html=True,
+        )
+        ov_col1, ov_col2 = st.columns(2)
+        with ov_col1:
+            override_cliente = st.text_input(T["override_cliente"], key="ov_cliente", placeholder="Ej: RUSAL SA DE CV")
+            override_date    = st.text_input(T["override_date"],    key="ov_date",    placeholder="2026-03-04")
+        with ov_col2:
+            override_ref     = st.text_input(T["override_ref"],     key="ov_ref",     placeholder="Ej: PO-12345")
+            override_commit  = st.text_input(T["override_commit"],  key="ov_commit",  placeholder="2026-03-15")
+
 if uploaded_files and st.button(T["process_btn"], use_container_width=True):
     text_parts: list[str] = []
     vision_images: list[tuple[str, str]] = []
@@ -1229,6 +1267,21 @@ if uploaded_files and st.button(T["process_btn"], use_container_width=True):
     # ── Client name resolution ─────────────────────────────────────────────
     # Parse first, then resolve each unique cliente against the Odoo Clientes list
     result_df = parse_response_to_df(raw_response)
+
+    # ── Apply manual overrides (blank AI fields OR user-supplied values) ────
+    ov_cliente = st.session_state.get("ov_cliente", "").strip()
+    ov_ref     = st.session_state.get("ov_ref",     "").strip()
+    ov_date    = st.session_state.get("ov_date",    "").strip()
+    ov_commit  = st.session_state.get("ov_commit",  "").strip()
+    if not result_df.empty:
+        if ov_cliente:
+            result_df["*//Cliente"] = ov_cliente
+        if ov_ref:
+            result_df["client_order_ref"] = ov_ref
+        if ov_date:
+            result_df["date_order"] = ov_date
+        if ov_commit:
+            result_df["commitment_date"] = ov_commit
     api_key = (
         st.session_state.get("manual_api_key", "").strip()
         or os.environ.get("ANTHROPIC_API_KEY", "")
