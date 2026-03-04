@@ -850,7 +850,12 @@ def to_odoo_excel(df: pd.DataFrame) -> bytes:
             ws[f"B{i}"] = row.get("date_order", "")
             ws[f"C{i}"] = row.get("commitment_date", "")
             ws[f"D{i}"] = row.get("*//Cliente", "")
-        ws[f"E{i}"] = row.get("Producto", "")
+        producto_val = row.get("Producto", "")
+        try:
+            producto_val = int(producto_val) if str(producto_val).strip().isdigit() else float(producto_val) if str(producto_val).strip().replace('.','',1).isdigit() else producto_val
+        except (ValueError, TypeError):
+            pass
+        ws[f"E{i}"] = producto_val
         ws[f"G{i}"] = row.get("order_line / product_uom_qty", 0)
         # Formulas for validation columns
         ws[f"F{i}"] = f'=IF(E{i}="","",IF(ISERROR(VLOOKUP(E{i},Productos!B:B,1,FALSE)),"MAL","BIEN"))'
@@ -1197,31 +1202,31 @@ if uploaded_files:
         unsafe_allow_html=True,
     )
 
-    # ── Optional override fields ───────────────────────────────────────────
-    with st.expander(T["override_title"]):
-        st.markdown(
-            f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
-            f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
-            f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
-            f"⚠️ <strong>Solo llena estos campos si el PO no los incluye.</strong> "
-            f"Si el PO ya tiene cliente, referencia o fechas, déjalos en blanco — "
-            f"la IA los detectará automáticamente.</div>"
-            if st.session_state.lang == "es" else
-            f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
-            f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
-            f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
-            f"⚠️ <strong>Only fill these fields if the PO does not include them.</strong> "
-            f"If the PO already has a client, reference, or dates, leave these blank — "
-            f"the AI will detect them automatically.</div>",
-            unsafe_allow_html=True,
-        )
-        ov_col1, ov_col2 = st.columns(2)
-        with ov_col1:
-            override_cliente = st.text_input(T["override_cliente"], key="ov_cliente", placeholder="Ej: RUSAL SA DE CV")
-            override_date    = st.text_input(T["override_date"],    key="ov_date",    placeholder="2026-03-04")
-        with ov_col2:
-            override_ref     = st.text_input(T["override_ref"],     key="ov_ref",     placeholder="Ej: PO-12345")
-            override_commit  = st.text_input(T["override_commit"],  key="ov_commit",  placeholder="2026-03-15")
+# ── Optional override fields (always visible) ─────────────────────────────
+with st.expander(T["override_title"]):
+    st.markdown(
+        f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
+        f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
+        f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
+        f"⚠️ <strong>Solo llena estos campos si el PO no los incluye.</strong> "
+        f"Si el PO ya tiene cliente, referencia o fechas, déjalos en blanco — "
+        f"la IA los detectará automáticamente.</div>"
+        if st.session_state.lang == "es" else
+        f"<div style='background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);"
+        f"border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.9rem;"
+        f"font-size:0.82rem;color:#fde68a;font-family:Inter,sans-serif'>"
+        f"⚠️ <strong>Only fill these fields if the PO does not include them.</strong> "
+        f"If the PO already has a client, reference, or dates, leave these blank — "
+        f"the AI will detect them automatically.</div>",
+        unsafe_allow_html=True,
+    )
+    ov_col1, ov_col2 = st.columns(2)
+    with ov_col1:
+        override_cliente = st.text_input(T["override_cliente"], key="ov_cliente", placeholder="Ej: RUSAL SA DE CV")
+        override_date    = st.text_input(T["override_date"],    key="ov_date",    placeholder="2026-03-04")
+    with ov_col2:
+        override_ref     = st.text_input(T["override_ref"],     key="ov_ref",     placeholder="Ej: PO-12345")
+        override_commit  = st.text_input(T["override_commit"],  key="ov_commit",  placeholder="2026-03-15")
 
 if uploaded_files and st.button(T["process_btn"], use_container_width=True):
     text_parts: list[str] = []
