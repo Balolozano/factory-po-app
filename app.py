@@ -417,10 +417,6 @@ T = LANG[st.session_state.lang]
 # ---------------------------------------------------------------------------
 import anthropic  # noqa: E402
 
-# Warm up caches in background so they're ready when the user hits Process
-load_odoo_clients()
-
-
 @st.cache_resource
 def load_odoo_clients() -> list[str]:
     """Load client names from the Clientes sheet. Uses pandas for fast bulk read."""
@@ -437,6 +433,8 @@ def load_odoo_clients() -> list[str]:
     except Exception:
         return []
 
+# Warm up cache so it's ready when the user hits Process
+load_odoo_clients()
 
 
 def _normalize_client(s: str) -> str:
