@@ -417,6 +417,9 @@ T = LANG[st.session_state.lang]
 # ---------------------------------------------------------------------------
 import anthropic  # noqa: E402
 
+# Warm up caches in background so they're ready when the user hits Process
+load_odoo_clients()
+
 
 @st.cache_resource
 def load_odoo_clients() -> list[str]:
@@ -531,12 +534,6 @@ def resolve_client_name(raw_name: str, api_key: str) -> str:
     return raw_name  # no confident match
 
 
-@st.cache_resource
-def load_easyocr():
-    import easyocr
-    return easyocr.Reader(["es", "en"], gpu=False)
-
-
 def get_pdfplumber():
     import pdfplumber
     return pdfplumber
@@ -600,19 +597,8 @@ def extract_text_from_pdf(file_bytes: bytes, filename: str) -> tuple[str, bool]:
 
 
 def extract_text_from_image(file_bytes: bytes, filename: str) -> tuple[str, bool]:
-    """OCR an image with EasyOCR; fall back to vision if result is too short."""
-    try:
-        reader = load_easyocr()
-        import numpy as np
-        from PIL import Image
-        img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
-        result = reader.readtext(np.array(img), detail=0)
-        text = " ".join(result).strip()
-        if len(text) >= 40:
-            return f"[Image OCR: {filename}]\n{text}", False
-    except Exception:
-        pass
-    return "", True  # Need vision
+    """Always send images to Claude Vision — more accurate than local OCR."""
+    return "", True
 
 
 def resize_image_for_vision(file_bytes: bytes) -> str:
@@ -647,8 +633,8 @@ def render_pdf_for_vision(file_bytes: bytes, fname: str) -> list[tuple[str, str]
         doc = fitz.open(stream=file_bytes, filetype="pdf")
         for page_num in range(len(doc)):
             page = doc[page_num]
-            # 200 DPI matrix (PDF unit = 1/72 inch → scale = 200/72)
-            mat = fitz.Matrix(200 / 72, 200 / 72)
+            # 150 DPI matrix (PDF unit = 1/72 inch → scale = 150/72)
+            mat = fitz.Matrix(150 / 72, 150 / 72)
             pix = page.get_pixmap(matrix=mat, colorspace=fitz.csRGB)
             img_bytes = pix.tobytes("jpeg")
             vision_images.append((resize_image_for_vision(img_bytes), fname))
@@ -661,7 +647,7 @@ def render_pdf_for_vision(file_bytes: bytes, fname: str) -> list[tuple[str, str]
 
     # ── Method 2: pdf2image + poppler (fallback) ─────────────────────────────
     from pdf2image import convert_from_bytes
-    imgs = convert_from_bytes(file_bytes, dpi=200)
+    imgs = convert_from_bytes(file_bytes, dpi=150)
     for pg_img in imgs:
         buf = io.BytesIO()
         pg_img.save(buf, format="JPEG", quality=JPEG_QUALITY)
@@ -907,8 +893,10 @@ _logo_img_sidebar = (
 )
 
 st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif !important; }
 
 #MainMenu, footer, header { visibility: hidden; }
