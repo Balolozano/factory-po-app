@@ -1216,15 +1216,16 @@ section[data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input
     color: #E8622A;
 }
 .step-label {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: #3D5166;
+    color: rgba(255,255,255,0.25) !important;
     text-align: center;
     letter-spacing: 0.2px;
     white-space: nowrap;
+    font-family: 'Inter', sans-serif;
 }
-.step-label.active { color: #E8622A; }
-.step-label.done   { color: #7A8FA6; }
+.step-label.active { color: #E8622A !important; }
+.step-label.done   { color: #7A8FA6 !important; }
 .step-connector {
     height: 2px;
     width: 60px;
@@ -1505,69 +1506,9 @@ section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input:fo
 </style>
 """, unsafe_allow_html=True)
 
-# ── Item 1: Spanish dropzone text override (ES mode only) ────────────────────
-if st.session_state.lang == "es":
-    st.markdown("""
-    <style>
-    /* Hide native English dropzone text and inject Spanish */
-    [data-testid$="Dropzone"] > span:first-of-type {
-        font-size: 0 !important;
-        line-height: 0 !important;
-        display: block !important;
-        height: 1.2em !important;
-        position: relative !important;
-    }
-    [data-testid$="Dropzone"] > span:first-of-type::before {
-        content: "Arrastra y suelta archivos aquí";
-        font-size: 0.875rem !important;
-        font-weight: 600 !important;
-        color: #F0F4F8 !important;
-        font-family: 'Inter', sans-serif !important;
-        position: absolute !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        white-space: nowrap !important;
-        line-height: 1.2em !important;
-    }
-    [data-testid$="Dropzone"] > small {
-        font-size: 0 !important;
-        line-height: 0 !important;
-        display: block !important;
-        height: 1.1em !important;
-        position: relative !important;
-    }
-    [data-testid$="Dropzone"] > small::before {
-        content: "Máx. 200 MB · XLSX, XLS, PDF, PNG, JPG";
-        font-size: 0.78rem !important;
-        font-weight: 500 !important;
-        color: #7A8FA6 !important;
-        font-family: 'Inter', sans-serif !important;
-        position: absolute !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        white-space: nowrap !important;
-        line-height: 1.1em !important;
-    }
-    [data-testid$="Dropzone"] button {
-        color: transparent !important;
-        font-size: 0 !important;
-        position: relative !important;
-        min-width: 130px !important;
-    }
-    [data-testid$="Dropzone"] button::before {
-        content: "Seleccionar archivos";
-        color: #E8622A !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        font-family: 'Inter', sans-serif !important;
-        position: absolute !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        white-space: nowrap !important;
-    }
-    [data-testid$="Dropzone"] button:hover::before { color: white !important; }
-    </style>
-    """, unsafe_allow_html=True)
+# ── Item 1: Spanish dropzone hint — shown as a caption above the dropzone ────
+# (CSS text-replacement in Streamlit's React dropzone is unreliable; a clear
+#  label + the pills row below provide sufficient Spanish context instead.)
 
 # ── UI CHANGE: Sidebar — distinct BG1 background, orange underline on logo, ──
 # ── branded section headers, info card rows, subtle logout text-link ──────────
@@ -1660,7 +1601,17 @@ with _hcol:
 
 # ── UPLOAD ────────────────────────────────────────────────────────────────
 _r = st.session_state.get("ov_reset", 0)
-st.markdown(f"<div class='upload-label'>{T['upload_label']}</div>", unsafe_allow_html=True)
+_upload_hint = (
+    "Arrastra y suelta archivos aquí, o selecciona con el botón"
+    if st.session_state.lang == "es"
+    else "Drag and drop files here, or click Browse files"
+)
+st.markdown(
+    f"<div class='upload-label'>{T['upload_label']}</div>"
+    f"<div style='font-size:0.78rem;color:#7A8FA6;margin:-0.2rem 0 0.5rem;"
+    f"font-family:Inter,sans-serif;font-weight:400'>{_upload_hint}</div>",
+    unsafe_allow_html=True,
+)
 uploaded_files = st.file_uploader(
     "drop",
     type=["xlsx", "xls", "pdf", "png", "jpg", "jpeg"],
