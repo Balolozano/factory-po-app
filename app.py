@@ -108,8 +108,8 @@ LANG = {
         "override_commit":  "Fecha Compromiso (YYYY-MM-DD)",
         "new_po_btn":       "🔄 Nueva PO",
         "code_choice_label": "🔀 Este PO tiene dos columnas de código — ¿cuál usar como Producto?",
-        "code_lodi":        "Código LODI (proveedor)",
-        "code_cliente":     "Código del cliente",
+        "code_lodi":        "Columna 1",
+        "code_cliente":     "Columna 2",
     },
     "en": {
         "page_title":       "LODI — PO Converter",
@@ -155,8 +155,8 @@ LANG = {
         "override_commit":  "Commitment Date (YYYY-MM-DD)",
         "new_po_btn":       "🔄 New PO",
         "code_choice_label": "🔀 This PO has two code columns — which one to use as Product?",
-        "code_lodi":        "LODI Code (vendor)",
-        "code_cliente":     "Client Code",
+        "code_lodi":        "Column 1",
+        "code_cliente":     "Column 2",
     },
 }
 
