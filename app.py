@@ -261,42 +261,51 @@ if not st.session_state.authenticated:
         else '<span style="font-size:2.5rem;font-weight:900;color:#E8622A">LODI</span>'
     )
 
-    # ── CSS: dark page + block-container AS the white card ───────────────────
+    # ── UI CHANGE: Login page — full redesign with animated mesh gradient, ──
+    # ── larger card, orange top-border, improved typography, thicker separator ──
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    #MainMenu, footer, header { visibility: hidden; }
+    #MainMenu, footer, header, [data-testid="stToolbar"] { visibility: hidden; display: none; }
 
     html, body { font-family: 'Inter', sans-serif !important; }
 
-    /* Dark page background with subtle warm glow */
+    /* ── Animated mesh gradient background ── */
+    @keyframes mesh-drift {
+        0%   { background-position: 0% 0%, 100% 100%, 50% 50%; }
+        33%  { background-position: 30% 15%, 65% 85%, 40% 60%; }
+        66%  { background-position: 15% 40%, 85% 55%, 60% 30%; }
+        100% { background-position: 0% 0%, 100% 100%, 50% 50%; }
+    }
     .stApp {
-        background: #0d1117 !important;
+        background-color: #080C12 !important;
         background-image:
-            radial-gradient(ellipse 80% 50% at 50% -10%,
-                rgba(232,98,42,0.18) 0%, transparent 60%) !important;
+            radial-gradient(ellipse 70% 55% at 25% -10%, rgba(232,98,42,0.22) 0%, transparent 55%),
+            radial-gradient(ellipse 55% 45% at 85% 110%, rgba(245,158,11,0.1) 0%, transparent 50%),
+            radial-gradient(ellipse 40% 30% at 70% 40%, rgba(232,98,42,0.06) 0%, transparent 50%) !important;
+        background-size: 100% 100%;
+        animation: mesh-drift 14s ease-in-out infinite;
         min-height: 100vh;
     }
 
     section[data-testid="stMain"] { background: transparent !important; }
 
-    /* ── The block-container IS the white card ── */
+    /* ── Card: larger, orange top-border, more padding ── */
     .block-container {
-        max-width: 420px !important;
-        margin: max(6vh, 40px) auto 2rem !important;
-        padding: 2.5rem 2.5rem 2rem !important;
+        max-width: 460px !important;
+        margin: max(5vh, 40px) auto 2rem !important;
+        padding: 3rem 3rem 2.5rem !important;
         background: #ffffff !important;
-        border-radius: 24px !important;
-        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 20px !important;
+        border-top: 3px solid #E8622A !important;
         box-shadow:
-            0 0 0 1px rgba(232,98,42,0.08),
-            0 20px 40px rgba(0,0,0,0.5),
-            0 60px 120px rgba(0,0,0,0.35) !important;
+            0 0 0 1px rgba(232,98,42,0.12),
+            0 24px 64px rgba(0,0,0,0.55),
+            0 60px 120px rgba(0,0,0,0.3) !important;
     }
 
-    /* ── Language button — right-aligned, pill style ── */
-    /* Targets the st-key-{key} class Streamlit adds to the button wrapper */
+    /* ── Language button — right-aligned pill ── */
     .st-key-lang_login {
         display: flex !important;
         justify-content: flex-end !important;
@@ -315,17 +324,16 @@ if not st.session_state.authenticated:
         width: auto !important;
         min-width: 0 !important;
         letter-spacing: 0.2px;
-        transition: all 0.15s !important;
+        transition: all 0.18s cubic-bezier(0.4,0,0.2,1) !important;
     }
     .st-key-lang_login button:hover {
         background: #E8622A !important;
         border-color: #E8622A !important;
         color: #fff !important;
-        transform: none !important;
         box-shadow: none !important;
     }
 
-    /* ── Password input ── */
+    /* ── Password input (light card context) ── */
     [data-testid="stTextInput"] > div > div > input {
         background: #f8fafc !important;
         border: 1.5px solid #e2e8f0 !important;
@@ -333,7 +341,7 @@ if not st.session_state.authenticated:
         font-size: 1rem !important;
         font-family: 'Inter', sans-serif !important;
         color: #0f172a !important;
-        padding: 0.7rem 1rem !important;
+        padding: 0.7rem 1rem 0.7rem 2.8rem !important;
         transition: border-color 0.18s, box-shadow 0.18s !important;
     }
     [data-testid="stTextInput"] > div > div > input:focus {
@@ -341,6 +349,21 @@ if not st.session_state.authenticated:
         box-shadow: 0 0 0 3px rgba(232,98,42,0.13) !important;
         background: #fff !important;
         outline: none !important;
+    }
+
+    /* Lock icon pseudo-element on the input wrapper */
+    [data-testid="stTextInput"] > div > div {
+        position: relative !important;
+    }
+    [data-testid="stTextInput"] > div > div::before {
+        content: "🔒";
+        position: absolute;
+        left: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        pointer-events: none;
+        z-index: 1;
     }
 
     /* ── Sign-in button ── */
@@ -355,13 +378,13 @@ if not st.session_state.authenticated:
         padding: 0.75rem !important;
         letter-spacing: 0.3px !important;
         box-shadow: 0 4px 20px rgba(232,98,42,0.38) !important;
-        transition: opacity 0.18s, transform 0.15s !important;
+        transition: opacity 0.18s, transform 0.15s, box-shadow 0.18s !important;
         width: 100% !important;
     }
     .stFormSubmitButton > button:hover {
         opacity: 0.9 !important;
         transform: translateY(-1px) !important;
-        box-shadow: 0 6px 24px rgba(232,98,42,0.5) !important;
+        box-shadow: 0 8px 28px rgba(232,98,42,0.52) !important;
     }
 
     /* Remove form border/bg */
@@ -391,15 +414,16 @@ if not st.session_state.authenticated:
         unsafe_allow_html=True,
     )
 
-    # ── Title + accent line ───────────────────────────────────────────────────
+    # ── UI CHANGE: Title uses Display scale (1.4rem/800), subtitle improved ──
+    # ── Separator is now 3px with full-width fade ─────────────────────────────
     st.markdown(
-        f"<div style='text-align:center;font-size:1.2rem;font-weight:800;"
-        f"color:#0f172a;font-family:Inter,sans-serif;margin-bottom:0.3rem'>"
+        f"<div style='text-align:center;font-size:1.4rem;font-weight:800;"
+        f"color:#0f172a;font-family:Inter,sans-serif;margin-bottom:0.3rem;letter-spacing:-0.3px'>"
         f"{T['login_title']}</div>"
-        f"<div style='text-align:center;font-size:0.85rem;color:#94a3b8;"
-        f"font-family:Inter,sans-serif;margin-bottom:1.4rem'>{T['login_sub']}</div>"
-        f"<div style='height:2px;background:linear-gradient(90deg,transparent,#E8622A 30%,"
-        f"#f59e0b 70%,transparent);border-radius:2px;margin-bottom:1.5rem'></div>",
+        f"<div style='text-align:center;font-size:0.875rem;color:#64748b;"
+        f"font-family:Inter,sans-serif;margin-bottom:1.5rem;font-weight:400'>{T['login_sub']}</div>"
+        f"<div style='height:3px;background:linear-gradient(90deg,transparent 0%,#E8622A 25%,"
+        f"#f59e0b 75%,transparent 100%);border-radius:2px;margin-bottom:1.6rem'></div>",
         unsafe_allow_html=True,
     )
 
@@ -418,10 +442,10 @@ if not st.session_state.authenticated:
             else:
                 st.error(T["login_error"])
 
-    # ── Footer ────────────────────────────────────────────────────────────────
+    # ── UI CHANGE: Footer — intentionally subtle at 0.75rem, #3D5166 ─────────
     st.markdown(
-        f"<div style='text-align:center;font-size:0.72rem;color:#94a3b8;"
-        f"margin-top:1.4rem;font-family:Inter,sans-serif;letter-spacing:0.4px'>"
+        f"<div style='text-align:center;font-size:0.75rem;color:#3D5166;"
+        f"margin-top:1.6rem;font-family:Inter,sans-serif;letter-spacing:0.4px'>"
         f"{T['login_footer']}</div>",
         unsafe_allow_html=True,
     )
@@ -900,73 +924,170 @@ if _logo_path.exists():
         _logo_b64 = _b64.b64encode(_lf.read()).decode()
 _logo_img_header = (
     f"<img src='data:image/png;base64,{_logo_b64}' "
-    "style='width:60px;pointer-events:none;user-select:none;flex-shrink:0'>"
+    "style='width:56px;pointer-events:none;user-select:none;flex-shrink:0'>"
     if _logo_b64 else ""
 )
 _logo_img_sidebar = (
     f"<img src='data:image/png;base64,{_logo_b64}' "
-    "style='width:110px;pointer-events:none;user-select:none;display:block;margin:auto'>"
+    "style='width:100px;pointer-events:none;user-select:none;display:block;margin:auto'>"
     if _logo_b64 else ""
 )
 
+# ── UI CHANGE: Full CSS rewrite — strict 5-color palette, typography scale, ──
+# ── sidebar depth, secondary buttons, pulse CTA, teal download, card system ──
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif !important; }
 
-#MainMenu, footer, header { visibility: hidden; }
+/* ── Hide Streamlit chrome ───────────────────────────────────────────────── */
+#MainMenu, footer, header, [data-testid="stToolbar"] { visibility: hidden; display: none; }
 
-/* ══ DARK PAGE — matches login page exactly ════════════════════════ */
+/* ══ COLOR SYSTEM ════════════════════════════════════════════════════════════
+   BG0  (page)   : #080C12
+   BG1  (sidebar): #0F1620
+   BG2  (cards)  : #162030
+   BG3  (inputs) : #1C2A3C
+   Text primary  : #F0F4F8
+   Text secondary: #7A8FA6
+   Text muted    : #3D5166
+   Border subtle : rgba(255,255,255,0.07)
+   Border accent : rgba(232,98,42,0.5)
+   Brand primary : #E8622A  (CTAs + key accents only)
+   Brand accent  : #f59e0b  (warnings + secondary highlights)
+══════════════════════════════════════════════════════════════════════════════ */
+
+/* ══ TYPOGRAPHY SCALE ═════════════════════════════════════════════════════
+   Display  : 1.4rem / 800
+   Heading  : 1rem   / 700 / uppercase / ls 0.6px
+   Body     : 0.875rem / 400
+   Small    : 0.78rem  / 500
+   Micro    : 0.68rem  / 500 / uppercase / ls 0.5px
+══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── TRANSITIONS — all interactive elements ──────────────────────────────── */
+* { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ══ DARK PAGE ═══════════════════════════════════════════════════════════════ */
 .stApp {
-    background: #0d1117 !important;
+    background-color: #080C12 !important;
     background-image: radial-gradient(
-        ellipse 70% 40% at 60% 0%,
-        rgba(232,98,42,0.14) 0%, transparent 60%) !important;
+        ellipse 70% 40% at 65% -5%,
+        rgba(232,98,42,0.13) 0%, transparent 55%) !important;
     min-height: 100vh;
 }
 section[data-testid="stMain"] { background: transparent !important; }
 .block-container { padding-top: 1rem !important; padding-bottom: 2.5rem !important; }
 
-/* ══ SIDEBAR ═══════════════════════════════════════════════════════ */
+/* ══ SIDEBAR ══════════════════════════════════════════════════════════════════
+   BG1 (#0F1620) — distinctly deeper than page, warm orange right border      */
 section[data-testid="stSidebar"] > div:first-child {
-    background: #0d1117 !important;
-    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    background: #0F1620 !important;
+    border-right: 1px solid rgba(232,98,42,0.15) !important;
     padding: 1.4rem 1rem !important;
 }
 section[data-testid="stSidebar"] label,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div { color: #94a3b8 !important; }
-section[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.07) !important; margin: 0.8rem 0 !important; }
-section[data-testid="stSidebar"] .stButton > button {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    color: #cbd5e1 !important; border-radius: 10px !important;
-    font-weight: 600 !important; transition: all 0.18s !important;
-}
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: #E8622A !important; border-color: #E8622A !important;
-    color: white !important; transform: none !important;
+section[data-testid="stSidebar"] div { color: #7A8FA6 !important; }
+section[data-testid="stSidebar"] hr {
+    border-color: rgba(255,255,255,0.06) !important;
+    margin: 0.8rem 0 !important;
 }
 
-/* ══ LANGUAGE TOGGLE — column-based, ultra-specific selector ═══════
-   Specificity: (0,3,2) beats div.stButton>button (0,1,2)
-   even when both use !important                                     */
-[data-testid="stHorizontalBlock"] [data-testid="stColumn"]:last-child [data-testid="stButton"] > button,
-[data-testid="stHorizontalBlock"] [data-testid="stColumn"]:last-child [data-testid="stButton"] > button:focus {
-    background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.22) !important;
-    color: #e2e8f0 !important;
+/* Sidebar section headers — orange-tinted at 60% */
+.sb-section-header {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    color: rgba(232,98,42,0.65) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    font-family: 'Inter', sans-serif !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Sidebar info card (claude-haiku block) */
+.sb-info-card {
+    background: #162030;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
+    margin-top: 0.5rem;
+}
+.sb-info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: #7A8FA6;
+    padding: 0.18rem 0;
+    font-family: 'Inter', sans-serif;
+}
+.sb-info-row .accent { color: #E8622A !important; font-weight: 600 !important; }
+
+/* Sidebar LOGOUT button — destructive red tint */
+section[data-testid="stSidebar"] .stButton > button {
+    background: rgba(239,68,68,0.1) !important;
+    border: 1px solid rgba(239,68,68,0.3) !important;
+    color: #fca5a5 !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1) !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: white !important;
+    transform: none !important;
+}
+
+/* Sidebar API key input */
+section[data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {
+    background-color: #1C2A3C !important;
+    border: 1px solid #2A3F57 !important;
+    border-radius: 10px !important;
+    color: #F0F4F8 !important;
+    -webkit-text-fill-color: #F0F4F8 !important;
+}
+
+/* ══ NUEVA PO BUTTON — secondary ghost style ══════════════════════════════ */
+.st-key-new_po_btn button {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    color: #7A8FA6 !important;
     border-radius: 99px !important;
     font-size: 0.78rem !important;
     font-weight: 600 !important;
-    padding: 6px 18px !important;
+    padding: 6px 14px !important;
     box-shadow: none !important;
     white-space: nowrap !important;
-    letter-spacing: 0.3px !important;
-    transition: all 0.15s !important;
+    letter-spacing: 0.2px !important;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1) !important;
 }
-[data-testid="stHorizontalBlock"] [data-testid="stColumn"]:last-child [data-testid="stButton"] > button:hover {
+.st-key-new_po_btn button:hover {
+    border-color: #E8622A !important;
+    color: #E8622A !important;
+    background: rgba(232,98,42,0.06) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ══ LANGUAGE TOGGLE — small pill, auto-width ════════════════════════════ */
+.st-key-lang_main button {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    color: #7A8FA6 !important;
+    border-radius: 99px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.2px !important;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.st-key-lang_main button:hover {
     background: #E8622A !important;
     border-color: #E8622A !important;
     color: white !important;
@@ -974,28 +1095,38 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     opacity: 1 !important;
 }
 
-/* ══ HEADER CARD ════════════════════════════════════════════════════ */
+/* ══ HEADER CARD ═════════════════════════════════════════════════════════════
+   BG2 card, 5px orange left-border, stronger shadow                          */
 .lodi-topbar {
-    display: flex; align-items: center; gap: 1.2rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.09);
-    border-left: 4px solid #E8622A;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: #162030;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 5px solid #E8622A;
     border-radius: 16px;
     padding: 1.1rem 1.6rem;
     margin-bottom: 1.2rem;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 1px rgba(232,98,42,0.12), 0 8px 32px rgba(0,0,0,0.4);
 }
 .lodi-topbar h1 {
-    font-size: 1.3rem; font-weight: 800; color: #f1f5f9;
-    margin: 0; line-height: 1.2; font-family: 'Inter', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #F0F4F8;
+    margin: 0;
+    line-height: 1.2;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.3px;
 }
 .lodi-topbar p {
-    font-size: 0.82rem; color: #64748b;
-    margin: 0.2rem 0 0; font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: #7A8FA6;
+    margin: 0.2rem 0 0;
+    font-family: 'Inter', sans-serif;
 }
 
-/* ══ UPLOAD CARD ════════════════════════════════════════════════════ */
+/* ══ UPLOAD CARD ═════════════════════════════════════════════════════════════
+   Branded dropzone with hover glow, orange Browse button                     */
 [data-testid="stFileUploader"] {
     background: transparent !important;
     border: none !important;
@@ -1003,164 +1134,259 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     padding: 0 !important;
     box-shadow: none !important;
 }
-/* Target dropzone — ends-with $= avoids matching stFileUploaderDropzoneInput */
 [data-testid$="Dropzone"] {
-    background: rgba(232,98,42,0.05) !important;
-    border: 2px dashed rgba(232,98,42,0.6) !important;
-    border-radius: 12px !important;
-    min-height: 140px !important;
+    background: rgba(232,98,42,0.04) !important;
+    border: 2px dashed rgba(232,98,42,0.4) !important;
+    border-radius: 14px !important;
+    min-height: 160px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 0.4rem !important;
-    padding: 2.2rem 1.5rem !important;
-    transition: all 0.2s !important;
+    padding: 2.5rem 1.5rem !important;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2) !important;
 }
 [data-testid$="Dropzone"]:hover {
-    background: rgba(232,98,42,0.10) !important;
-    border-color: #E8622A !important;
+    background: rgba(232,98,42,0.08) !important;
+    border-color: rgba(232,98,42,0.7) !important;
+    box-shadow: 0 0 0 4px rgba(232,98,42,0.08),
+                0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2) !important;
 }
 [data-testid$="Dropzone"] svg {
-    color: #E8622A !important; width: 2.2rem !important; height: 2.2rem !important; opacity: 0.9 !important;
+    color: #E8622A !important;
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+    opacity: 1 !important;
 }
 [data-testid$="Dropzone"] span, [data-testid$="Dropzone"] p {
-    color: #cbd5e1 !important; font-size: 0.95rem !important;
-    font-weight: 600 !important; font-family: 'Inter', sans-serif !important;
-}
-[data-testid$="Dropzone"] small {
-    color: #475569 !important; font-size: 0.78rem !important;
-    font-family: 'Inter', sans-serif !important;
-}
-[data-testid$="Dropzone"] button {
-    background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    color: #cbd5e1 !important; border-radius: 8px !important;
-    font-size: 0.82rem !important; font-weight: 600 !important;
-    padding: 6px 18px !important; margin-top: 0.5rem !important;
-    transition: all 0.15s !important; box-shadow: none !important;
-}
-[data-testid$="Dropzone"] button:hover {
-    background: #E8622A !important; border-color: #E8622A !important;
-    color: white !important; transform: none !important;
-}
-
-/* ══ PROCESS BUTTON (orange gradient) ══════════════════════════════ */
-div.stButton > button {
-    background: linear-gradient(135deg, #E8622A 0%, #f59e0b 100%) !important;
-    border: none !important; color: white !important; font-weight: 700 !important;
-    font-size: 1rem !important; font-family: 'Inter', sans-serif !important;
-    border-radius: 12px !important; padding: 0.72rem !important;
-    box-shadow: 0 4px 20px rgba(232,98,42,0.35) !important;
-    letter-spacing: 0.3px !important;
-    transition: opacity 0.18s, transform 0.15s, box-shadow 0.15s !important;
-}
-div.stButton > button:hover {
-    opacity: 0.9 !important; transform: translateY(-1px) !important;
-    box-shadow: 0 6px 24px rgba(232,98,42,0.5) !important;
-}
-
-/* ══ DOWNLOAD BUTTON (green) ════════════════════════════════════════ */
-div.stDownloadButton > button {
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
-    border: none !important; color: white !important; font-weight: 700 !important;
-    font-size: 0.95rem !important; font-family: 'Inter', sans-serif !important;
-    border-radius: 12px !important; padding: 0.7rem !important;
-    box-shadow: 0 4px 14px rgba(22,163,74,0.3) !important;
-    letter-spacing: 0.3px !important; transition: opacity 0.18s !important;
-}
-div.stDownloadButton > button:hover { opacity: 0.88 !important; transform: none !important; }
-
-/* ══ RESULTS HEADER ═════════════════════════════════════════════════ */
-.results-header {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.09); border-left: 4px solid #E8622A;
-    border-radius: 12px; padding: 0.9rem 1.2rem; margin: 1.5rem 0 0.5rem;
-    font-size: 1rem; font-weight: 700; color: #f1f5f9;
-    font-family: 'Inter', sans-serif;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-}
-.results-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 0.8rem; font-family: 'Inter', sans-serif; }
-
-/* ══ PILLS (sidebar) ════════════════════════════════════════════════ */
-.pill {
-    display: inline-block; background: rgba(255,255,255,0.08); color: #94a3b8;
-    font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem;
-    border-radius: 99px; margin: 0.15rem 0.1rem; border: 1px solid rgba(255,255,255,0.1);
-    font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-/* ══ TEXT INPUTS (dark theme — main page only, not login) ════════════ */
-section[data-testid="stMain"] [data-testid="stTextInput"] label {
-    color: #94a3b8 !important;
-    font-size: 0.8rem !important;
+    color: #F0F4F8 !important;
+    font-size: 0.875rem !important;
     font-weight: 600 !important;
     font-family: 'Inter', sans-serif !important;
 }
-section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input {
-    background-color: #1e293b !important;
-    border: 1px solid #334155 !important;
-    border-radius: 10px !important;
-    color: #f1f5f9 !important;
+[data-testid$="Dropzone"] small {
+    color: #7A8FA6 !important;
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
     font-family: 'Inter', sans-serif !important;
-    font-size: 0.9rem !important;
-    -webkit-text-fill-color: #f1f5f9 !important;
+}
+[data-testid$="Dropzone"] button {
+    background: rgba(232,98,42,0.15) !important;
+    border: 1px solid rgba(232,98,42,0.4) !important;
+    color: #E8622A !important;
+    border-radius: 8px !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    padding: 6px 18px !important;
+    margin-top: 0.5rem !important;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1) !important;
+    box-shadow: none !important;
+}
+[data-testid$="Dropzone"] button:hover {
+    background: #E8622A !important;
+    border-color: #E8622A !important;
+    color: white !important;
+    transform: none !important;
+}
+
+/* ══ PROCESS BUTTON — orange gradient CTA with pulse animation ═══════════ */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 4px 20px rgba(232,98,42,0.35); }
+    50%       { box-shadow: 0 6px 32px rgba(232,98,42,0.65); }
+}
+/* Default button style — orange gradient for all main buttons */
+div.stButton > button {
+    background: linear-gradient(135deg, #E8622A 0%, #f59e0b 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 12px !important;
+    padding: 0.72rem !important;
+    box-shadow: 0 4px 20px rgba(232,98,42,0.35) !important;
+    letter-spacing: 0.3px !important;
+    transition: opacity 0.18s, transform 0.15s, box-shadow 0.18s !important;
+}
+div.stButton > button:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 24px rgba(232,98,42,0.5) !important;
+}
+/* Process button — pulse animation */
+.st-key-proc_btn button {
+    animation: pulse-glow 2s ease-in-out infinite !important;
+}
+.st-key-proc_btn button:hover {
+    animation: none !important;
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ══ DOWNLOAD BUTTON — teal/cyan (success, distinct from orange CTA) ═══════ */
+div.stDownloadButton > button {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 12px !important;
+    padding: 0.7rem !important;
+    box-shadow: 0 4px 14px rgba(8,145,178,0.3) !important;
+    letter-spacing: 0.3px !important;
+    transition: opacity 0.18s !important;
+}
+div.stDownloadButton > button:hover {
+    opacity: 0.88 !important;
+    transform: none !important;
+    box-shadow: 0 6px 20px rgba(8,145,178,0.45) !important;
+}
+
+/* ══ RESULTS HEADER — matches topbar exactly ════════════════════════════════ */
+.results-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #162030;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 5px solid #E8622A;
+    border-radius: 16px;
+    padding: 1rem 1.4rem;
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #F0F4F8;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 0 0 1px rgba(232,98,42,0.12), 0 8px 32px rgba(0,0,0,0.4);
+}
+/* Row count pill badge */
+.count-badge {
+    background: rgba(232,98,42,0.1);
+    color: #E8622A;
+    border-radius: 99px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid rgba(232,98,42,0.2);
+}
+.results-sub {
+    font-size: 0.78rem;
+    color: #7A8FA6;
+    margin-bottom: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+/* ══ FORMAT PILLS — branded orange tint ═══════════════════════════════════ */
+.pill {
+    display: inline-block;
+    background: rgba(232,98,42,0.12);
+    color: rgba(232,98,42,0.9);
+    border: 1px solid rgba(232,98,42,0.3);
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    margin: 0.15rem 0.1rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ══ SECTION LABELS — consistent micro heading style ═══════════════════════ */
+.section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #7A8FA6;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 0.8rem;
+}
+.upload-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #7A8FA6;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 0.5rem;
+}
+
+/* ══ TEXT INPUTS (dark theme — main page only, not login) ═══════════════════ */
+section[data-testid="stMain"] [data-testid="stTextInput"] label {
+    color: #7A8FA6 !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    letter-spacing: 0.3px !important;
+}
+section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input {
+    background-color: #1C2A3C !important;
+    border: 1px solid #2A3F57 !important;
+    border-radius: 10px !important;
+    color: #F0F4F8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    -webkit-text-fill-color: #F0F4F8 !important;
+    transition: border-color 0.18s, box-shadow 0.18s !important;
 }
 section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input::placeholder {
-    color: #64748b !important;
-    -webkit-text-fill-color: #64748b !important;
+    color: #3D5166 !important;
+    -webkit-text-fill-color: #3D5166 !important;
     opacity: 1 !important;
 }
 section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input:focus {
     border-color: #E8622A !important;
-    box-shadow: 0 0 0 2px rgba(232,98,42,0.2) !important;
-    background-color: #243247 !important;
-    -webkit-text-fill-color: #f1f5f9 !important;
-}
-/* Sidebar API key input — also dark */
-section[data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {
-    background-color: #1e293b !important;
-    border: 1px solid #334155 !important;
-    border-radius: 10px !important;
-    color: #f1f5f9 !important;
-    -webkit-text-fill-color: #f1f5f9 !important;
+    box-shadow: 0 0 0 3px rgba(232,98,42,0.15) !important;
+    background-color: #1e3148 !important;
+    -webkit-text-fill-color: #F0F4F8 !important;
 }
 
-/* ══ PROGRESS BAR ════════════════════════════════════════════════════ */
+/* ══ PROGRESS BAR ════════════════════════════════════════════════════════════ */
 .stProgress > div > div > div > div { background-color: #E8622A !important; }
 
-/* ══ DATA EDITOR ═════════════════════════════════════════════════════ */
+/* ══ DATA EDITOR — rounded container clips inner table borders ══════════════ */
 [data-testid="stDataEditor"] {
-    border-radius: 12px !important; overflow: hidden !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2) !important;
 }
 
-/* ══ EXPANDER ════════════════════════════════════════════════════════ */
+/* ══ EXPANDER — card look, branded ══════════════════════════════════════════ */
 [data-testid="stExpander"] {
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    border-radius: 10px !important;
+    background: #162030 !important;
+    border: 1px solid rgba(255,255,255,0.07) !important;
+    border-radius: 12px !important;
+}
+[data-testid="stExpander"] summary {
+    color: #7A8FA6 !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
 }
 
-/* ══ UPLOAD LABEL (custom HTML, dark-friendly) ════════════════════ */
-.upload-label {
-    font-size: 0.88rem; font-weight: 700; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    font-family: 'Inter', sans-serif; margin-bottom: 0.5rem;
+/* ══ SECTION DIVIDERS ════════════════════════════════════════════════════════ */
+.section-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 1.2rem 0;
+    border: none;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ── SIDEBAR ───────────────────────────────────────────────────────────────
+# ── UI CHANGE: Sidebar — distinct BG1 background, orange underline on logo, ──
+# ── branded section headers, info card rows, destructive logout button ────────
 with st.sidebar:
     st.markdown(
-        f"<div style='text-align:center;padding:0.5rem 0 0.2rem'>{_logo_img_sidebar}</div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "<div style='text-align:center;font-size:0.75rem;color:#9ca3af;"
-        "letter-spacing:1px;font-weight:600;text-transform:uppercase;"
-        "margin-bottom:0.4rem'>Manufacturing</div>",
+        f"<div style='text-align:center;padding:0.5rem 0 0.3rem'>"
+        f"{_logo_img_sidebar}"
+        f"<div style='width:36px;height:2px;background:#E8622A;margin:0.55rem auto 0.3rem;border-radius:1px'></div>"
+        f"<div style='font-size:0.68rem;color:#7A8FA6;letter-spacing:1.2px;font-weight:700;"
+        f"text-transform:uppercase;font-family:Inter,sans-serif'>Manufacturing</div>"
+        f"</div>",
         unsafe_allow_html=True,
     )
     st.markdown("---")
@@ -1171,9 +1397,8 @@ with st.sidebar:
         _has_key = False
     if not _has_key:
         st.markdown(
-            f"<div style='font-size:0.8rem;font-weight:700;color:#9ca3af;"
-            f"text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem'>"
-            f"{T['api_label']}</div>", unsafe_allow_html=True,
+            f"<div class='sb-section-header'>{T['api_label']}</div>",
+            unsafe_allow_html=True,
         )
         api_key_input = st.text_input(
             "key", type="password", placeholder="sk-ant-api03-...",
@@ -1186,20 +1411,19 @@ with st.sidebar:
         st.markdown("---")
 
     st.markdown(
-        f"<div style='font-size:0.8rem;font-weight:700;color:#9ca3af;"
-        f"text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem'>"
-        f"{T['sb_tool']}</div>", unsafe_allow_html=True,
+        f"<div class='sb-section-header'>{T['sb_tool']}</div>",
+        unsafe_allow_html=True,
     )
     st.markdown(
-        f"<div style='font-size:0.82rem;color:#d1d5db;line-height:1.6'>"
-        f"{T['sb_tool_desc']}</div>", unsafe_allow_html=True,
+        f"<div style='font-size:0.78rem;color:#7A8FA6;line-height:1.65;font-family:Inter,sans-serif'>"
+        f"{T['sb_tool_desc']}</div>",
+        unsafe_allow_html=True,
     )
     st.markdown("---")
 
     st.markdown(
-        f"<div style='font-size:0.8rem;font-weight:700;color:#9ca3af;"
-        f"text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.45rem'>"
-        f"{T['sb_formats']}</div>", unsafe_allow_html=True,
+        f"<div class='sb-section-header'>{T['sb_formats']}</div>",
+        unsafe_allow_html=True,
     )
     st.markdown(
         "<span class='pill'>.xlsx</span><span class='pill'>.xls</span>"
@@ -1207,10 +1431,13 @@ with st.sidebar:
         "<span class='pill'>.jpg</span><span class='pill'>.jpeg</span>",
         unsafe_allow_html=True,
     )
+    # ── UI CHANGE: Info card — proper rows instead of <br> line breaks ────────
     st.markdown(
-        "<div style='font-size:0.82rem;color:#d1d5db;margin-top:0.6rem'>"
-        "🤖 <span style='color:#E8622A;font-weight:600'>claude-haiku</span><br>"
-        "🌐 Español · English<br>⚡ Ultra-low token cost</div>",
+        "<div class='sb-info-card'>"
+        "<div class='sb-info-row'>🤖&nbsp;<span class='accent'>claude-haiku</span></div>"
+        "<div class='sb-info-row'>🌐&nbsp;Español · English</div>"
+        "<div class='sb-info-row'>⚡&nbsp;Ultra-low token cost</div>"
+        "</div>",
         unsafe_allow_html=True,
     )
     st.markdown("---")
@@ -1220,12 +1447,16 @@ with st.sidebar:
         st.session_state.pop("result_df", None)
         st.rerun()
 
+    # ── UI CHANGE: Footer — text-muted #3D5166, intentionally subtle ─────────
     st.markdown(
-        "<div style='text-align:center;font-size:0.7rem;color:#334155;margin-top:1rem'>"
-        "LODI Manufacturing<br>Monterrey, MX</div>", unsafe_allow_html=True,
+        "<div style='text-align:center;font-size:0.68rem;color:#3D5166;"
+        "margin-top:1rem;font-family:Inter,sans-serif;letter-spacing:0.4px;"
+        "text-transform:uppercase'>LODI Manufacturing<br>Monterrey, MX</div>",
+        unsafe_allow_html=True,
     )
 
-# ── HEADER ROW: logo+title left, new PO + lang toggle right ───────────────
+# ── UI CHANGE: Header row — Nueva PO is secondary ghost pill (st-key CSS), ───
+# ── language toggle is auto-width pill (st-key CSS), no full-width orange ─────
 _hcol, _ncol, _lcol = st.columns([6, 1, 1])
 with _ncol:
     if st.button(T["new_po_btn"], key="new_po_btn", use_container_width=True):
@@ -1258,23 +1489,23 @@ uploaded_files = st.file_uploader(
 )
 
 if uploaded_files:
+    # ── UI CHANGE: files-selected uses secondary text color ──────────────────
     st.markdown(
-        f"<div style='font-size:0.82rem;color:#64748b;margin:0.4rem 0 0.5rem;"
-        f"font-family:Inter,sans-serif'>"
+        f"<div style='font-size:0.78rem;color:#7A8FA6;margin:0.4rem 0 0.5rem;"
+        f"font-family:Inter,sans-serif;font-weight:500'>"
         f"✅ {T['files_selected'].format(n=len(uploaded_files))}</div>",
         unsafe_allow_html=True,
     )
 
-# ── Optional override fields (always visible) ─────────────────────────────
+# ── UI CHANGE: Override section — BG2 card, left-accent warning box ──────────
+st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 st.markdown(
-    f"<div style='background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);"
-    f"border-radius:12px;padding:1rem 1.2rem 0.8rem;margin:0.8rem 0'>"
-    f"<div style='font-size:0.8rem;font-weight:700;color:#94a3b8;text-transform:uppercase;"
-    f"letter-spacing:0.8px;margin-bottom:0.6rem;font-family:Inter,sans-serif'>"
-    f"📝 {T['override_title'].replace('📝 ', '')}</div>"
-    f"<div style='background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.35);"
-    f"border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.8rem;"
-    f"font-size:0.8rem;color:#fde68a;font-family:Inter,sans-serif'>"
+    f"<div style='background:#162030;border:1px solid rgba(255,255,255,0.07);"
+    f"border-radius:14px;padding:1.4rem;margin:0.4rem 0;box-shadow:0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.2)'>"
+    f"<div class='section-label'>📝 {T['override_title'].replace('📝 ', '')}</div>"
+    f"<div style='background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b;"
+    f"border-radius:0 8px 8px 0;padding:0.5rem 0.8rem;margin-bottom:0.9rem;"
+    f"font-size:0.78rem;color:#fde68a;font-family:Inter,sans-serif;font-weight:500'>"
     + (
         "⚠️ <strong>Solo llena estos campos si el PO no los incluye.</strong> "
         "Si el PO ya los tiene, déjalos en blanco — la IA los detectará automáticamente."
@@ -1293,7 +1524,15 @@ with ov_col2:
     override_ref     = st.text_input(T["override_ref"],     key=f"ov_ref_{_r}",     placeholder="Ej: PO-12345")
     override_commit  = st.text_input(T["override_commit"],  key=f"ov_commit_{_r}",  placeholder="2026-03-15")
 
-if uploaded_files and st.button(T["process_btn"], use_container_width=True):
+# ── UI CHANGE: Process button — centered column wrapper + key for pulse CSS ──
+st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+_proc_l, _proc_m, _proc_r = st.columns([1, 3, 1])
+with _proc_m:
+    _proc_clicked = bool(uploaded_files) and st.button(
+        T["process_btn"], key="proc_btn", use_container_width=True,
+    )
+
+if _proc_clicked:
     text_parts: list[str] = []
     vision_images: list[tuple[str, str]] = []
     progress = st.progress(0, text=T["prog_pre"])
@@ -1384,10 +1623,11 @@ if uploaded_files and st.button(T["process_btn"], use_container_width=True):
 if "result_df" in st.session_state:
     _stored_df = st.session_state["result_df"]
     n_rows = len(_stored_df)
+
+    # ── UI CHANGE: Results header matches topbar style; count uses pill badge ─
     st.markdown(
-        f"<div class='results-header'>{T['results_title']} "
-        f"<span style='font-weight:400;color:#6b7280;font-size:0.85rem'>"
-        f"— {n_rows} {T['lines_suffix']}</span></div>",
+        f"<div class='results-header'>{T['results_title']}"
+        f"<span class='count-badge'>{n_rows} {T['lines_suffix']}</span></div>",
         unsafe_allow_html=True,
     )
     st.markdown(f"<div class='results-sub'>{T['results_sub']}</div>", unsafe_allow_html=True)
