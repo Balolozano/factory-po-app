@@ -60,6 +60,17 @@ ALL_ODOO_COLUMNS = [
     "order_line / product_id / id",
 ]
 
+# Columns shown in the data editor (internal id columns are hidden from view)
+DISPLAY_COLUMNS = [
+    "client_order_ref",
+    "date_order",
+    "commitment_date",
+    "*//Cliente",
+    "Producto",
+    "Codigo Valido?",
+    "order_line / product_uom_qty",
+]
+
 # ---------------------------------------------------------------------------
 # Language strings
 # ---------------------------------------------------------------------------
@@ -79,28 +90,31 @@ LANG = {
         "files_selected":   "{n} archivo(s) seleccionado(s)",
         "process_btn":      "⚡ Procesar Pedidos con IA",
         "prog_pre":         "Preprocesando archivos localmente…",
-        "prog_file":        "Procesando: {f}",
+        "prog_file":        "Leyendo: {f}",
         "prog_claude":      "Consultando Claude AI…",
         "prog_done":        "¡Extracción completa!",
+        "prog_step1":       "📄 Leyendo archivos...",
+        "prog_step2":       "🤖 Analizando con IA...",
+        "prog_step3":       "✅ ¡Extracción completa!",
         "warn_pdf":         "No se pudo procesar el PDF escaneado: {f}",
         "results_title":    "📋 Líneas de pedido extraídas",
         "results_sub":      "Revisa y corrige cualquier valor antes de descargar. Puedes editar celdas, agregar o eliminar filas.",
         "download_btn":     "📥 Descargar Excel para Odoo",
-        "raw_expander":     "🔍 Ver respuesta de Claude",
+        "raw_expander":     "🔍 Ver análisis de la IA",
         "sb_tool":          "ℹ️ Herramienta",
         "sb_tool_desc":     "Extrae datos de órdenes de compra en Excel, PDF o imágenes y genera el archivo listo para importar en Odoo.",
-        "sb_formats":       "📎 Formatos",
-        "logout_btn":       "🔒 Cerrar sesión",
+        "logout_btn":       "Cerrar sesión",
         "col_qty":          "Cantidad",
         "col_date":         "Fecha Pedido",
         "col_commit":       "Fecha Compromiso",
         "col_ref":          "Ref. PO",
         "col_client":       "Cliente",
         "col_product":      "Producto",
+        "col_valid":        "¿Válido?",
         "api_label":        "🔑 API Key",
         "api_active":       "✅ API Key activa",
         "lines_suffix":     "línea(s)",
-        "override_title":   "📝 Datos faltantes (opcional)",
+        "override_title":   "📋 Completar información manualmente (opcional)",
         "override_sub":     "Si el PO no tiene estos datos, ingrésalos aquí y se aplicarán a todas las líneas.",
         "override_cliente": "Cliente",
         "override_ref":     "Ref. PO",
@@ -110,6 +124,10 @@ LANG = {
         "code_choice_label": "🔀 Este PO tiene dos columnas de código — ¿cuál usar como Producto?",
         "code_lodi":        "Columna 1",
         "code_cliente":     "Columna 2",
+        "step1":            "1 · Subir archivo",
+        "step2":            "2 · Procesar con IA",
+        "step3":            "3 · Descargar Excel",
+        "formats_label":    "Formatos aceptados",
     },
     "en": {
         "page_title":       "LODI — PO Converter",
@@ -126,28 +144,31 @@ LANG = {
         "files_selected":   "{n} file(s) selected",
         "process_btn":      "⚡ Process Orders with AI",
         "prog_pre":         "Preprocessing files locally…",
-        "prog_file":        "Processing: {f}",
+        "prog_file":        "Reading: {f}",
         "prog_claude":      "Calling Claude AI…",
         "prog_done":        "Extraction complete!",
+        "prog_step1":       "📄 Reading files...",
+        "prog_step2":       "🤖 Analyzing with AI...",
+        "prog_step3":       "✅ Extraction complete!",
         "warn_pdf":         "Could not process scanned PDF: {f}",
         "results_title":    "📋 Extracted PO Lines",
         "results_sub":      "Review and correct any values before downloading. You can edit cells, add or remove rows.",
         "download_btn":     "📥 Download Odoo-Ready Excel",
-        "raw_expander":     "🔍 View Claude response",
+        "raw_expander":     "🔍 View AI Analysis",
         "sb_tool":          "ℹ️ About",
         "sb_tool_desc":     "Extracts data from purchase orders in Excel, PDF or images and generates a file ready to import into Odoo.",
-        "sb_formats":       "📎 Formats",
-        "logout_btn":       "🔒 Sign Out",
+        "logout_btn":       "Sign out",
         "col_qty":          "Quantity",
         "col_date":         "Order Date",
         "col_commit":       "Commitment Date",
         "col_ref":          "PO Ref.",
         "col_client":       "Customer",
         "col_product":      "Product",
+        "col_valid":        "Valid?",
         "api_label":        "🔑 API Key",
         "api_active":       "✅ API Key active",
         "lines_suffix":     "line(s)",
-        "override_title":   "📝 Missing data (optional)",
+        "override_title":   "📋 Fill in information manually (optional)",
         "override_sub":     "If the PO is missing any of these fields, enter them here and they will be applied to all lines.",
         "override_cliente": "Client",
         "override_ref":     "PO Reference",
@@ -157,6 +178,10 @@ LANG = {
         "code_choice_label": "🔀 This PO has two code columns — which one to use as Product?",
         "code_lodi":        "Column 1",
         "code_cliente":     "Column 2",
+        "step1":            "1 · Upload file",
+        "step2":            "2 · Process with AI",
+        "step3":            "3 · Download Excel",
+        "formats_label":    "Accepted formats",
     },
 }
 
@@ -1025,7 +1050,7 @@ section[data-testid="stSidebar"] hr {
 }
 .sb-info-row .accent { color: #E8622A !important; font-weight: 600 !important; }
 
-/* Sidebar LOGOUT button — destructive red tint */
+/* Sidebar buttons — default destructive red tint */
 section[data-testid="stSidebar"] .stButton > button {
     background: rgba(239,68,68,0.1) !important;
     border: 1px solid rgba(239,68,68,0.3) !important;
@@ -1039,6 +1064,28 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     background: #dc2626 !important;
     border-color: #dc2626 !important;
     color: white !important;
+    transform: none !important;
+}
+
+/* ══ LOGOUT BUTTON — subtle text-link style (overrides sidebar default) ════ */
+section[data-testid="stSidebar"] .st-key-logout_btn button {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #3D5166 !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(61,81,102,0.4) !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+}
+section[data-testid="stSidebar"] .st-key-logout_btn button:hover {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #E8622A !important;
+    text-decoration-color: rgba(232,98,42,0.4) !important;
     transform: none !important;
 }
 
@@ -1124,6 +1171,70 @@ section[data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input
     margin: 0.2rem 0 0;
     font-family: 'Inter', sans-serif;
 }
+
+/* ══ STEPPER ══════════════════════════════════════════════════════════════════
+   3-step horizontal progress indicator                                        */
+.lodi-stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    margin: 0.6rem 0 1.2rem;
+    font-family: 'Inter', sans-serif;
+}
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 90px;
+}
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #1C2A3C;
+    border: 2px solid #2A3F57;
+    color: #3D5166;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+.step-circle.active {
+    background: #E8622A;
+    border-color: #E8622A;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(232,98,42,0.18);
+}
+.step-circle.done {
+    background: rgba(232,98,42,0.15);
+    border-color: rgba(232,98,42,0.5);
+    color: #E8622A;
+}
+.step-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #3D5166;
+    text-align: center;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+.step-label.active { color: #E8622A; }
+.step-label.done   { color: #7A8FA6; }
+.step-connector {
+    height: 2px;
+    width: 60px;
+    background: #1C2A3C;
+    border-radius: 1px;
+    margin-top: 14px;
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+}
+.step-connector.done { background: rgba(232,98,42,0.45); }
 
 /* ══ UPLOAD CARD ═════════════════════════════════════════════════════════════
    Branded dropzone with hover glow, orange Browse button                     */
@@ -1294,6 +1405,23 @@ div.stDownloadButton > button:hover {
     margin: 0.15rem 0.1rem;
     font-family: 'SF Mono', 'Fira Code', monospace;
 }
+.pills-row {
+    margin: 0.5rem 0 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-wrap: wrap;
+}
+.pills-row-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #3D5166;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Inter', sans-serif;
+    margin-right: 0.3rem;
+    white-space: nowrap;
+}
 
 /* ══ SECTION LABELS — consistent micro heading style ═══════════════════════ */
 .section-label {
@@ -1377,8 +1505,72 @@ section[data-testid="stMain"] [data-testid="stTextInput"] > div > div > input:fo
 </style>
 """, unsafe_allow_html=True)
 
+# ── Item 1: Spanish dropzone text override (ES mode only) ────────────────────
+if st.session_state.lang == "es":
+    st.markdown("""
+    <style>
+    /* Hide native English dropzone text and inject Spanish */
+    [data-testid$="Dropzone"] > span:first-of-type {
+        font-size: 0 !important;
+        line-height: 0 !important;
+        display: block !important;
+        height: 1.2em !important;
+        position: relative !important;
+    }
+    [data-testid$="Dropzone"] > span:first-of-type::before {
+        content: "Arrastra y suelta archivos aquí";
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        color: #F0F4F8 !important;
+        font-family: 'Inter', sans-serif !important;
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        white-space: nowrap !important;
+        line-height: 1.2em !important;
+    }
+    [data-testid$="Dropzone"] > small {
+        font-size: 0 !important;
+        line-height: 0 !important;
+        display: block !important;
+        height: 1.1em !important;
+        position: relative !important;
+    }
+    [data-testid$="Dropzone"] > small::before {
+        content: "Máx. 200 MB · XLSX, XLS, PDF, PNG, JPG";
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        color: #7A8FA6 !important;
+        font-family: 'Inter', sans-serif !important;
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        white-space: nowrap !important;
+        line-height: 1.1em !important;
+    }
+    [data-testid$="Dropzone"] button {
+        color: transparent !important;
+        font-size: 0 !important;
+        position: relative !important;
+        min-width: 130px !important;
+    }
+    [data-testid$="Dropzone"] button::before {
+        content: "Seleccionar archivos";
+        color: #E8622A !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        font-family: 'Inter', sans-serif !important;
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        white-space: nowrap !important;
+    }
+    [data-testid$="Dropzone"] button:hover::before { color: white !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
 # ── UI CHANGE: Sidebar — distinct BG1 background, orange underline on logo, ──
-# ── branded section headers, info card rows, destructive logout button ────────
+# ── branded section headers, info card rows, subtle logout text-link ──────────
 with st.sidebar:
     st.markdown(
         f"<div style='text-align:center;padding:0.5rem 0 0.3rem'>"
@@ -1419,18 +1611,6 @@ with st.sidebar:
         f"{T['sb_tool_desc']}</div>",
         unsafe_allow_html=True,
     )
-    st.markdown("---")
-
-    st.markdown(
-        f"<div class='sb-section-header'>{T['sb_formats']}</div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "<span class='pill'>.xlsx</span><span class='pill'>.xls</span>"
-        "<span class='pill'>.pdf</span><span class='pill'>.png</span>"
-        "<span class='pill'>.jpg</span><span class='pill'>.jpeg</span>",
-        unsafe_allow_html=True,
-    )
     # ── UI CHANGE: Info card — proper rows instead of <br> line breaks ────────
     st.markdown(
         "<div class='sb-info-card'>"
@@ -1442,7 +1622,8 @@ with st.sidebar:
     )
     st.markdown("---")
 
-    if st.button(T["logout_btn"], use_container_width=True):
+    # ── Item 9: Logout as subtle text-link ───────────────────────────────────
+    if st.button(T["logout_btn"], key="logout_btn", use_container_width=False):
         st.session_state.authenticated = False
         st.session_state.pop("result_df", None)
         st.rerun()
@@ -1491,18 +1672,59 @@ uploaded_files = st.file_uploader(
 if uploaded_files:
     # ── UI CHANGE: files-selected uses secondary text color ──────────────────
     st.markdown(
-        f"<div style='font-size:0.78rem;color:#7A8FA6;margin:0.4rem 0 0.5rem;"
+        f"<div style='font-size:0.78rem;color:#7A8FA6;margin:0.4rem 0 0.2rem;"
         f"font-family:Inter,sans-serif;font-weight:500'>"
         f"✅ {T['files_selected'].format(n=len(uploaded_files))}</div>",
         unsafe_allow_html=True,
     )
 
-# ── UI CHANGE: Override section — BG2 card, left-accent warning box ──────────
+# ── Item 2: Format pills below upload zone ────────────────────────────────────
+st.markdown(
+    f"<div class='pills-row'>"
+    f"<span class='pills-row-label'>{T['formats_label']}:</span>"
+    f"<span class='pill'>.xlsx</span><span class='pill'>.xls</span>"
+    f"<span class='pill'>.pdf</span><span class='pill'>.png</span>"
+    f"<span class='pill'>.jpg</span><span class='pill'>.jpeg</span>"
+    f"</div>",
+    unsafe_allow_html=True,
+)
+
+# ── Item 8: 3-step progress stepper ──────────────────────────────────────────
+if "result_df" in st.session_state:
+    _step = 3
+elif uploaded_files:
+    _step = 2
+else:
+    _step = 1
+
+def _render_stepper(step: int, labels: list[str]) -> str:
+    parts = []
+    for n, lbl in enumerate(labels, 1):
+        circ_cls = "done" if n < step else ("active" if n == step else "")
+        lbl_cls  = circ_cls
+        inner    = "✓" if n < step else str(n)
+        parts.append(
+            f"<div class='step-item'>"
+            f"<div class='step-circle {circ_cls}'>{inner}</div>"
+            f"<div class='step-label {lbl_cls}'>{lbl}</div>"
+            f"</div>"
+        )
+        if n < len(labels):
+            conn_cls = "done" if n < step else ""
+            parts.append(f"<div class='step-connector {conn_cls}'></div>")
+    return "<div class='lodi-stepper'>" + "".join(parts) + "</div>"
+
+st.markdown(
+    _render_stepper(_step, [T["step1"], T["step2"], T["step3"]]),
+    unsafe_allow_html=True,
+)
+
+# ── Item 3: Override section (renamed title) ──────────────────────────────────
 st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 st.markdown(
     f"<div style='background:#162030;border:1px solid rgba(255,255,255,0.07);"
     f"border-radius:14px;padding:1.4rem;margin:0.4rem 0;box-shadow:0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.2)'>"
-    f"<div class='section-label'>📝 {T['override_title'].replace('📝 ', '')}</div>"
+    f"<div class='section-label'>{T['override_title']}</div>"
     f"<div style='background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b;"
     f"border-radius:0 8px 8px 0;padding:0.5rem 0.8rem;margin-bottom:0.9rem;"
     f"font-size:0.78rem;color:#fde68a;font-family:Inter,sans-serif;font-weight:500'>"
@@ -1532,90 +1754,95 @@ with _proc_m:
         T["process_btn"], key="proc_btn", use_container_width=True,
     )
 
+# ── Item 4: Multi-step loading with st.status() ───────────────────────────────
 if _proc_clicked:
     text_parts: list[str] = []
     vision_images: list[tuple[str, str]] = []
-    progress = st.progress(0, text=T["prog_pre"])
+    result_df = pd.DataFrame()
+    raw_response = ""
 
-    for i, f in enumerate(uploaded_files):
-        file_bytes = f.read()
-        ext = Path(f.name).suffix.lower()
-        progress.progress(
-            (i + 1) / (len(uploaded_files) + 1),
-            text=T["prog_file"].format(f=f.name),
+    with st.status(T["prog_step1"], expanded=True) as _status:
+        _inner_prog = st.progress(0)
+
+        for i, f in enumerate(uploaded_files):
+            file_bytes = f.read()
+            ext = Path(f.name).suffix.lower()
+            _status.update(label=T["prog_file"].format(f=f.name))
+            _inner_prog.progress((i + 1) / (len(uploaded_files) + 1))
+
+            if ext in (".xlsx", ".xls"):
+                text_parts.append(extract_text_from_excel(file_bytes, f.name))
+            elif ext == ".pdf":
+                text, needs_vision = extract_text_from_pdf(file_bytes, f.name)
+                if needs_vision:
+                    # Scanned PDF — vision only
+                    try:
+                        vision_images.extend(render_pdf_for_vision(file_bytes, f.name))
+                    except Exception:
+                        st.warning(T["warn_pdf"].format(f=f.name))
+                else:
+                    # Digital PDF — send text layer AND rendered images
+                    text_parts.append(text)
+                    try:
+                        vision_images.extend(render_pdf_for_vision(file_bytes, f.name))
+                    except Exception:
+                        pass  # Vision is supplemental; text extraction succeeded
+            elif ext in (".png", ".jpg", ".jpeg"):
+                text, needs_vision = extract_text_from_image(file_bytes, f.name)
+                if needs_vision:
+                    vision_images.append((resize_image_for_vision(file_bytes), f.name))
+                else:
+                    text_parts.append(text)
+
+        _status.update(label=T["prog_step2"])
+        _inner_prog.progress(0.85)
+        raw_response = call_claude("\n\n".join(text_parts), vision_images)
+
+        # ── Parse response ─────────────────────────────────────────────────
+        result_df = parse_response_to_df(raw_response)
+
+        # ── Apply manual overrides ─────────────────────────────────────────
+        _r_cur = st.session_state.get("ov_reset", 0)
+        ov_cliente = st.session_state.get(f"ov_cliente_{_r_cur}", "").strip()
+        ov_ref     = st.session_state.get(f"ov_ref_{_r_cur}",     "").strip()
+        ov_date    = st.session_state.get(f"ov_date_{_r_cur}",    "").strip()
+        ov_commit  = st.session_state.get(f"ov_commit_{_r_cur}",  "").strip()
+        if not result_df.empty:
+            if ov_cliente:
+                result_df["*//Cliente"] = ov_cliente
+            if ov_ref:
+                result_df["client_order_ref"] = ov_ref
+            if ov_date:
+                result_df["date_order"] = ov_date
+            if ov_commit:
+                result_df["commitment_date"] = ov_commit
+
+        # ── Client name resolution ─────────────────────────────────────────
+        api_key = (
+            st.session_state.get("manual_api_key", "").strip()
+            or os.environ.get("ANTHROPIC_API_KEY", "")
+            or st.secrets.get("ANTHROPIC_API_KEY", "")
         )
-        if ext in (".xlsx", ".xls"):
-            text_parts.append(extract_text_from_excel(file_bytes, f.name))
-        elif ext == ".pdf":
-            text, needs_vision = extract_text_from_pdf(file_bytes, f.name)
-            if needs_vision:
-                # Scanned PDF — vision only
-                try:
-                    vision_images.extend(render_pdf_for_vision(file_bytes, f.name))
-                except Exception:
-                    st.warning(T["warn_pdf"].format(f=f.name))
-            else:
-                # Digital PDF — send text layer for structured data (tables,
-                # line items) AND rendered page images so Claude can read the
-                # buyer logo/letterhead that pdfplumber can't extract as text.
-                text_parts.append(text)
-                try:
-                    vision_images.extend(render_pdf_for_vision(file_bytes, f.name))
-                except Exception:
-                    pass  # Vision is supplemental; text extraction succeeded
-        elif ext in (".png", ".jpg", ".jpeg"):
-            text, needs_vision = extract_text_from_image(file_bytes, f.name)
-            if needs_vision:
-                vision_images.append((resize_image_for_vision(file_bytes), f.name))
-            else:
-                text_parts.append(text)
+        if api_key and not result_df.empty:
+            unique_clients = result_df["*//Cliente"].dropna().unique()
+            client_map: dict[str, str] = {}
+            for raw in unique_clients:
+                if raw.strip():
+                    client_map[raw] = resolve_client_name(raw, api_key)
+            result_df["*//Cliente"] = result_df["*//Cliente"].map(
+                lambda x: client_map.get(x, x)
+            )
 
-    progress.progress(0.9, text=T["prog_claude"])
-    raw_response = call_claude("\n\n".join(text_parts), vision_images)
+        # Ensure all Odoo columns exist; keep Producto_cliente as internal column
+        for col in ALL_ODOO_COLUMNS:
+            if col not in result_df.columns:
+                result_df[col] = ""
+        if "Producto_cliente" not in result_df.columns:
+            result_df["Producto_cliente"] = ""
 
-    # ── Client name resolution ─────────────────────────────────────────────
-    # Parse first, then resolve each unique cliente against the Odoo Clientes list
-    result_df = parse_response_to_df(raw_response)
+        _inner_prog.progress(1.0)
+        _status.update(label=T["prog_step3"], state="complete", expanded=False)
 
-    # ── Apply manual overrides (blank AI fields OR user-supplied values) ────
-    _r = st.session_state.get("ov_reset", 0)
-    ov_cliente = st.session_state.get(f"ov_cliente_{_r}", "").strip()
-    ov_ref     = st.session_state.get(f"ov_ref_{_r}",     "").strip()
-    ov_date    = st.session_state.get(f"ov_date_{_r}",    "").strip()
-    ov_commit  = st.session_state.get(f"ov_commit_{_r}",  "").strip()
-    if not result_df.empty:
-        if ov_cliente:
-            result_df["*//Cliente"] = ov_cliente
-        if ov_ref:
-            result_df["client_order_ref"] = ov_ref
-        if ov_date:
-            result_df["date_order"] = ov_date
-        if ov_commit:
-            result_df["commitment_date"] = ov_commit
-    api_key = (
-        st.session_state.get("manual_api_key", "").strip()
-        or os.environ.get("ANTHROPIC_API_KEY", "")
-        or st.secrets.get("ANTHROPIC_API_KEY", "")
-    )
-    if api_key and not result_df.empty:
-        # ── Resolve client names ───────────────────────────────────────────
-        unique_clients = result_df["*//Cliente"].dropna().unique()
-        client_map: dict[str, str] = {}
-        for raw in unique_clients:
-            if raw.strip():
-                client_map[raw] = resolve_client_name(raw, api_key)
-        result_df["*//Cliente"] = result_df["*//Cliente"].map(
-            lambda x: client_map.get(x, x)
-        )
-
-    # Ensure all Odoo columns exist; keep Producto_cliente as internal column
-    for col in ALL_ODOO_COLUMNS:
-        if col not in result_df.columns:
-            result_df[col] = ""
-    if "Producto_cliente" not in result_df.columns:
-        result_df["Producto_cliente"] = ""
-
-    progress.progress(1.0, text=T["prog_done"])
     st.session_state["result_df"] = result_df
     st.session_state["raw_response"] = raw_response
 
@@ -1632,32 +1859,57 @@ if "result_df" in st.session_state:
     )
     st.markdown(f"<div class='results-sub'>{T['results_sub']}</div>", unsafe_allow_html=True)
 
-    # ── Dual-code selector (shown only when the PO has two code columns) ────
+    # ── Dual-code detector ──────────────────────────────────────────────────
     _has_dual = (
         "Producto_cliente" in _stored_df.columns
         and _stored_df["Producto_cliente"].str.strip().ne("").any()
     )
+
+    # ── Item 7: Show sample values in dual-code selector labels ──────────────
     if _has_dual:
+        _sample_lodi = ""
+        _sample_cli  = ""
+        for _, _row in _stored_df.iterrows():
+            if not _sample_lodi and str(_row.get("Producto", "")).strip():
+                _sample_lodi = str(_row["Producto"]).strip()
+            if not _sample_cli and str(_row.get("Producto_cliente", "")).strip():
+                _sample_cli = str(_row["Producto_cliente"]).strip()
+            if _sample_lodi and _sample_cli:
+                break
+
+        _col_a_label = f"A: {_sample_lodi}" if _sample_lodi else T["code_lodi"]
+        _col_b_label = f"B: {_sample_cli}"  if _sample_cli  else T["code_cliente"]
+
         _code_choice = st.radio(
             T["code_choice_label"],
             options=["lodi", "cliente"],
-            format_func=lambda x: T["code_lodi"] if x == "lodi" else T["code_cliente"],
+            format_func=lambda x: _col_a_label if x == "lodi" else _col_b_label,
             horizontal=True,
             key="code_choice",
         )
     else:
         _code_choice = "lodi"
 
-    # Build display df: swap Producto when client code is selected, hide internal column
+    # Build display df: swap Producto when client code is selected
     _display_df = _stored_df.copy()
     if _code_choice == "cliente" and _has_dual:
         _mask = _display_df["Producto_cliente"].str.strip().ne("")
         _display_df.loc[_mask, "Producto"] = _display_df.loc[_mask, "Producto_cliente"]
-    # Keep only the Odoo columns for display (drop internal Producto_cliente)
-    for _col in ALL_ODOO_COLUMNS:
+
+    # ── Item 5: Use DISPLAY_COLUMNS (hides internal id columns) ──────────────
+    for _col in DISPLAY_COLUMNS:
         if _col not in _display_df.columns:
             _display_df[_col] = ""
-    _display_df = _display_df[ALL_ODOO_COLUMNS]
+    _display_df = _display_df[DISPLAY_COLUMNS].copy()
+
+    # ── Item 6: Visual encoding for "Codigo Valido?" column ──────────────────
+    def _encode_valid(v: str) -> str:
+        v = str(v).strip().upper()
+        if v == "BIEN":  return "✅"
+        if v == "MAL":   return "❌"
+        return "⚪"
+
+    _display_df["Codigo Valido?"] = _display_df["Codigo Valido?"].apply(_encode_valid)
 
     edited_df = st.data_editor(
         _display_df,
@@ -1671,25 +1923,37 @@ if "result_df" in st.session_state:
             "client_order_ref":  st.column_config.TextColumn(T["col_ref"]),
             "*//Cliente":        st.column_config.TextColumn(T["col_client"]),
             "Producto":          st.column_config.TextColumn(T["col_product"]),
+            "Codigo Valido?":    st.column_config.TextColumn(
+                T["col_valid"],
+                disabled=True,
+                help="Calculado automáticamente en Excel al descargar" if st.session_state.lang == "es"
+                     else "Calculated automatically in Excel upon download",
+            ),
         },
     )
 
     st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
-    col_dl, col_raw = st.columns([2, 1])
-    with col_dl:
-        for col in ALL_ODOO_COLUMNS:
-            if col not in edited_df.columns:
-                edited_df[col] = ""
-        edited_df = edited_df[ALL_ODOO_COLUMNS]
-        excel_bytes = to_odoo_excel(edited_df)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-        st.download_button(
-            label=T["download_btn"],
-            data=excel_bytes,
-            file_name=f"Carga_Pedidos_Odoo_{timestamp}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
-        )
-    with col_raw:
-        with st.expander(T["raw_expander"]):
-            st.code(st.session_state.get("raw_response", ""), language="json")
+
+    # ── Item 10: Expander ABOVE download, both full-width ─────────────────────
+    with st.expander(T["raw_expander"]):
+        st.code(st.session_state.get("raw_response", ""), language="json")
+
+    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+
+    # Download button — full width, below expander
+    # Reconstruct full Odoo column set from edited display df + stored internal cols
+    _export_df = edited_df.copy()
+    # Add internal id columns back (always empty — filled by Excel formulas)
+    for col in ALL_ODOO_COLUMNS:
+        if col not in _export_df.columns:
+            _export_df[col] = ""
+    _export_df = _export_df[ALL_ODOO_COLUMNS]
+    excel_bytes = to_odoo_excel(_export_df)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    st.download_button(
+        label=T["download_btn"],
+        data=excel_bytes,
+        file_name=f"Carga_Pedidos_Odoo_{timestamp}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+    )
