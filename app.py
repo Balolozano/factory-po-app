@@ -107,6 +107,9 @@ LANG = {
         "override_date":    "Fecha Pedido (YYYY-MM-DD)",
         "override_commit":  "Fecha Compromiso (YYYY-MM-DD)",
         "new_po_btn":       "🔄 Nueva PO",
+        "code_choice_label": "🔀 Este PO tiene dos columnas de código — ¿cuál usar como Producto?",
+        "code_lodi":        "Código LODI (proveedor)",
+        "code_cliente":     "Código del cliente",
     },
     "en": {
         "page_title":       "LODI — PO Converter",
@@ -151,6 +154,9 @@ LANG = {
         "override_date":    "Order Date (YYYY-MM-DD)",
         "override_commit":  "Commitment Date (YYYY-MM-DD)",
         "new_po_btn":       "🔄 New PO",
+        "code_choice_label": "🔀 This PO has two code columns — which one to use as Product?",
+        "code_lodi":        "LODI Code (vendor)",
+        "code_cliente":     "Client Code",
     },
 }
 
@@ -171,7 +177,8 @@ Each object in the array MUST have exactly these keys (no extras):
   "date_order": "order date in YYYY-MM-DD format",
   "commitment_date": "promised/required delivery date in YYYY-MM-DD, or 2 days after date_order if not found",
   "cliente": "the company that ISSUED this PO — the BUYER (string)",
-  "producto": "the PART NUMBER or PRODUCT CODE (NOT the description) — see CRITICAL section below",
+  "producto": "LODI's PART NUMBER or PRODUCT CODE — see CRITICAL section below",
+  "producto_cliente": "the CLIENT's own code/part number if the PO has a SEPARATE column for it — else use \"\"",
   "qty": quantity as a number (integer or decimal, no text)
 }
 
@@ -215,6 +222,17 @@ The "producto" field MUST contain ONLY the PART NUMBER or PRODUCT CODE — never
 - Example PO line:  1 | 40630 | FLANGE: 3 BLT TRIAN 4-3/4 X 3-1/2 X 3/8 THK | 1000 EA
   → producto = "40630"
 - If ONLY a description is visible and no code exists, put the description in "producto".
+
+CRITICAL — dual code columns (producto vs producto_cliente):
+Some POs list TWO separate code columns: LODI's own code AND the client's code.
+- If the PO has ONE code column → put it in "producto", leave "producto_cliente" as "".
+- If the PO has TWO code columns with labels such as:
+    "Vendor Part #" / "Customer Part #", "Our Code" / "Your Code",
+    "Código Proveedor" / "Código Cliente", "No. Proveedor" / "No. Cliente", etc.:
+  → put LODI's / vendor / supplier code in "producto"
+  → put the client's / buyer / customer code in "producto_cliente"
+- Both must still be PART NUMBERS only (never descriptions).
+- If unsure which is which, put the shorter/numeric one in "producto" and the other in "producto_cliente".
 
 SCANNED / IMAGE PDFs:
 Some inputs will be rendered page images (photos or scans of paper POs). When processing these:
@@ -780,6 +798,7 @@ def parse_response_to_df(raw: str) -> pd.DataFrame:
             "commitment_date": str(item.get("commitment_date", "")),
             "*//Cliente": str(item.get("cliente", "")),
             "Producto": str(item.get("producto", "")),
+            "Producto_cliente": str(item.get("producto_cliente", "")),
             "Codigo Valido?": "",
             "order_line / product_uom_qty": item.get("qty", 0),
             "id": "",
@@ -1350,11 +1369,12 @@ if uploaded_files and st.button(T["process_btn"], use_container_width=True):
             lambda x: client_map.get(x, x)
         )
 
-    # Ensure final column order matches Odoo template
+    # Ensure all Odoo columns exist; keep Producto_cliente as internal column
     for col in ALL_ODOO_COLUMNS:
         if col not in result_df.columns:
             result_df[col] = ""
-    result_df = result_df[ALL_ODOO_COLUMNS]
+    if "Producto_cliente" not in result_df.columns:
+        result_df["Producto_cliente"] = ""
 
     progress.progress(1.0, text=T["prog_done"])
     st.session_state["result_df"] = result_df
@@ -1362,7 +1382,8 @@ if uploaded_files and st.button(T["process_btn"], use_container_width=True):
 
 # ── RESULTS ───────────────────────────────────────────────────────────────
 if "result_df" in st.session_state:
-    n_rows = len(st.session_state["result_df"])
+    _stored_df = st.session_state["result_df"]
+    n_rows = len(_stored_df)
     st.markdown(
         f"<div class='results-header'>{T['results_title']} "
         f"<span style='font-weight:400;color:#6b7280;font-size:0.85rem'>"
@@ -1371,8 +1392,35 @@ if "result_df" in st.session_state:
     )
     st.markdown(f"<div class='results-sub'>{T['results_sub']}</div>", unsafe_allow_html=True)
 
+    # ── Dual-code selector (shown only when the PO has two code columns) ────
+    _has_dual = (
+        "Producto_cliente" in _stored_df.columns
+        and _stored_df["Producto_cliente"].str.strip().ne("").any()
+    )
+    if _has_dual:
+        _code_choice = st.radio(
+            T["code_choice_label"],
+            options=["lodi", "cliente"],
+            format_func=lambda x: T["code_lodi"] if x == "lodi" else T["code_cliente"],
+            horizontal=True,
+            key="code_choice",
+        )
+    else:
+        _code_choice = "lodi"
+
+    # Build display df: swap Producto when client code is selected, hide internal column
+    _display_df = _stored_df.copy()
+    if _code_choice == "cliente" and _has_dual:
+        _mask = _display_df["Producto_cliente"].str.strip().ne("")
+        _display_df.loc[_mask, "Producto"] = _display_df.loc[_mask, "Producto_cliente"]
+    # Keep only the Odoo columns for display (drop internal Producto_cliente)
+    for _col in ALL_ODOO_COLUMNS:
+        if _col not in _display_df.columns:
+            _display_df[_col] = ""
+    _display_df = _display_df[ALL_ODOO_COLUMNS]
+
     edited_df = st.data_editor(
-        st.session_state["result_df"],
+        _display_df,
         use_container_width=True,
         num_rows="dynamic",
         key="po_editor",
